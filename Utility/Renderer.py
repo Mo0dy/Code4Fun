@@ -25,6 +25,7 @@ def render_points(points, color, output):
     for i in range(points.shape[0]):
         i1 = nb.int32(points[i, 0])
         i2 = nb.int32(points[i, 1])
-        output[i1, i2, 0] = color[0]
-        output[i1, i2, 1] = color[1]
-        output[i1, i2, 2] = color[2]
+        if 0 < i1 < output.shape[0] and 0 < i2 < output.shape[1]:
+            output[i1, i2, 0] = color[0]
+            output[i1, i2, 1] = color[1]
+            output[i1, i2, 2] = color[2]

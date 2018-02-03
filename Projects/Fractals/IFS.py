@@ -95,8 +95,7 @@ def draw():
     # render_arr[:, :] = (50, 50, 50)
     screen.fill((50, 50, 50))
     color = np.array([255, 255, 255], dtype=np.uint8)
-    draw_points = clip(t * points, 0, window_size[0] - 1, 0, window_size[1] - 1)
-    render_points(draw_points, color, pg.surfarray.pixels3d(screen))
+    render_points(t * points, color, pg.surfarray.pixels3d(screen))
 
     text = font.render(str(clock.get_fps()), True, (100, 100, 100))
     screen.blit(text, (100, 100))
