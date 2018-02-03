@@ -18,13 +18,14 @@ surfpos = np.array([0, 0], dtype=np.int32)
 
 # settings
 # simulation
-particle_amount = 140000
+density = 3
+particle_amount = int(47000 * density)
 par_mouse_attract_init = 0.1
 particle_attraction_init = 2
 particle_disburtion_init = -0.01
 drag_coeff_init = 0.04
 # drag_coeff = 0.05
-random_factor_init = 0.4
+random_factor_init = 0.1 # 0.4
 lineheight = 20
 
 
@@ -34,6 +35,7 @@ window_size = 800, 250
 x_bounds_init = [-500, window_size[0] + 500]
 y_bounds_init = [-100, window_size[1] + 100]
 screen = pg.display.set_mode(window_size)  # , pg.NOFRAME)
+pg.display.set_icon(pg.image.load("Assets\\icon.png"))
 pg.display.set_caption("Particle Clock")
 # background_color = 206, 195, 163
 # particle_color = np.array([206, 59, 22], dtype=int)
@@ -78,23 +80,24 @@ def update_goals():
     # goal_forces = np.zeros(particle_amount, dtype=np.float32)
     goal_forces = np.ones(particle_amount, dtype=np.float32) * particle_disburtion
     goal_arr[:] = pg.surfarray.pixels2d(goal_surf)
-    fast_update_goals(goals, goal_arr, surfpos, goal_forces, particle_attraction)
+    fast_update_goals(goals, goal_arr, surfpos, goal_forces, particle_attraction, density)
 
 
-@nb.guvectorize([(nb.float32[:, :], nb.int32[:, :], nb.int32[:], nb.float32[:], nb.float32)], '(a,b),(c,d),(e),(a),()', target='parallel', cache=True)
-def fast_update_goals(g, input_array, offset, g_f, attrac_f):
+@nb.guvectorize([(nb.float32[:, :], nb.int32[:, :], nb.int32[:], nb.float32[:], nb.float32, nb.int32)], '(a,b),(c,d),(e),(a),(),()', target='parallel', cache=True)
+def fast_update_goals(g, input_array, offset, g_f, attrac_f, d):
     index = 0
     for i in range(input_array.shape[0]):
         for j in range(input_array.shape[1]):
             if input_array[i, j]:
-                for ii in range(3):
+                for ii in range(d):
                     g_f[index] = attrac_f
                     g[index, 0] = i + offset[0]
                     g[index, 1] = j + offset[1]
                     index += 1
 
 
-@nb.guvectorize([(nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:], nb.float32, nb.float32[:], nb.float32, nb.float32, nb.float32, nb.int32[:], nb.int32[:])], '(a,b),(a,b),(a,b),(a,b),(a),(),(c),(),(),(),(d),(d)', target='parallel', cache=True)
+@nb.guvectorize([(nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:], nb.float32, nb.float32[:], nb.float32, nb.float32, nb.float32, nb.int32[:], nb.int32[:])],
+                '(a,b),(a,b),(a,b),(a,b),(a),(),(c),(),(),(),(d),(d)', target='parallel', cache=True)
 def update(p, vel, f, goal_pos, goal_attract, drag, m_p, m_attrack, ran_fac, delta_time, x_b, y_b):
     border_force = 0.1
     if m_attrack == 0:

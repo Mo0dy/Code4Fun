@@ -10,7 +10,7 @@ import os
 
 
 point_amount = int(2e6)
-trans = tmplt.barnsleys_fern
+trans = tmplt.cyclosorus_fern
 autoscale = True
 
 
