@@ -19,7 +19,8 @@ surfpos = np.array([0, 0], dtype=np.int32)
 
 # settings
 # simulation
-particle_amount = 140000
+particle_density = 3
+particle_amount = 47000 * particle_density
 par_mouse_attract_init = 0.1
 particle_attraction_init = 2
 particle_disburtion_init = -0.01
@@ -27,6 +28,7 @@ drag_coeff_init = 0.04
 # drag_coeff = 0.05
 random_factor_init = 0.4
 lineheight = 20
+# this has to be integers
 
 
 # display
@@ -79,16 +81,16 @@ def update_goals():
     # goal_forces = np.zeros(particle_amount, dtype=np.float32)
     goal_forces = np.ones(particle_amount, dtype=np.float32) * particle_disburtion
     goal_arr[:] = pg.surfarray.pixels2d(goal_surf)
-    fast_update_goals(goals, goal_arr, surfpos, goal_forces, particle_attraction)
+    fast_update_goals(goals, goal_arr, surfpos, goal_forces, particle_attraction, particle_density)
 
 
-@nb.guvectorize([(nb.float32[:, :], nb.int32[:, :], nb.int32[:], nb.float32[:], nb.float32)], '(a,b),(c,d),(e),(a),()', target='parallel')
-def fast_update_goals(g, input_array, offset, g_f, attrac_f):
+@nb.guvectorize([(nb.float32[:, :], nb.int32[:, :], nb.int32[:], nb.float32[:], nb.float32, nb.int32)], '(a,b),(c,d),(e),(a),(),()', target='parallel')
+def fast_update_goals(g, input_array, offset, g_f, attrac_f, pd):
     index = 0
     for i in range(input_array.shape[0]):
         for j in range(input_array.shape[1]):
             if input_array[i, j]:
-                for ii in range(3):
+                for ii in range(pd):
                     g_f[index] = attrac_f
                     g[index, 0] = i + offset[0]
                     g[index, 1] = j + offset[1]
