@@ -4,6 +4,7 @@ import numba as nb
 import pygame.gfxdraw
 import datetime
 import os
+import Code4Fun.Utility.Renderer as rnd
 
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (500, 300)
@@ -36,8 +37,8 @@ screen = pg.display.set_mode(window_size)  # , pg.NOFRAME)
 pg.display.set_caption("Particle Clock")
 # background_color = 206, 195, 163
 # particle_color = np.array([206, 59, 22], dtype=int)
-background_color = 20, 20, 20
-particle_color = np.array([142, 136, 8], dtype=int)
+background_color = np.array([20, 20, 20], dtype=np.uint8)
+particle_color = np.array([142, 136, 8], dtype=np.uint8)
 small_font = pg.font.SysFont("comicsansms", 10)
 display_font = pg.font.SysFont("caolibri", 250)
 pg.mouse.set_visible(False)
@@ -54,18 +55,22 @@ y_bounds = y_bounds_init
 particles = np.zeros((particle_amount, 2), dtype=np.float32)
 velocities = np.zeros((particle_amount, 2), dtype=np.float32)
 forces = np.zeros((particle_amount, 2), dtype=np.float32)
-# init_goals = np.column_stack((np.linspace(50, 750, particle_amount, dtype=np.float32), np.random.rand(particle_amount) * 20 + lineheight)).astype(np.float32)
 init_goals = np.column_stack((np.linspace(50, 750, particle_amount, dtype=np.float32), np.random.rand(particle_amount) * 20 + lineheight)).astype(np.float32)
 goals = init_goals
-color_factors = np.ones(particle_amount)
 goal_forces = np.ones(particle_amount)
 clock = pg.time.Clock()
 
-
-render_arr = np.zeros((window_size[0], window_size[1], 3), dtype=np.int32)
-
 last_second = -1
 goal_arr = np.zeros(goal_size, dtype=np.int32)
+
+
+def init():
+    global particles, velocities, forces
+    particles = np.zeros((particle_amount, 2), dtype=np.float32)
+    particles = particles.astype(np.float32)
+    velocities = np.zeros((particle_amount, 2), dtype=np.float32)
+    forces = np.zeros((particle_amount, 2), dtype=np.float32)
+    animation()
 
 
 def update_goals():
@@ -87,15 +92,6 @@ def fast_update_goals(g, input_array, offset, g_f, attrac_f):
                     g[index, 0] = i + offset[0]
                     g[index, 1] = j + offset[1]
                     index += 1
-
-
-def init():
-    global particles, velocities, forces
-    particles = np.zeros((particle_amount, 2), dtype=np.float32)
-    particles = particles.astype(np.float32)
-    velocities = np.zeros((particle_amount, 2), dtype=np.float32)
-    forces = np.zeros((particle_amount, 2), dtype=np.float32)
-    animation()
 
 
 @nb.guvectorize([(nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:], nb.float32, nb.float32[:], nb.float32, nb.float32, nb.float32, nb.int32[:], nb.int32[:])], '(a,b),(a,b),(a,b),(a,b),(a),(),(c),(),(),(),(d),(d)', target='parallel')
@@ -138,23 +134,9 @@ def update(p, vel, f, goal_pos, goal_attract, drag, m_p, m_attrack, ran_fac, del
         p[i, 1] += vel[i, 1] * delta_time
 
 
-@nb.guvectorize([(nb.int32[:, :, :], nb.float32[:, :], nb.float32[:], nb.int32[:])], '(a,b,c),(d,e),(d),(c)', target='parallel')
-def render(input_arr, p, g_f, p_c):
-    for i in range(p.shape[0]):
-        if 0 < p[i, 0] < input_arr.shape[0] and 0 < p[i, 1] < input_arr.shape[1]:
-            i1 = nb.int32(p[i, 0])
-            i2 = nb.int32(p[i, 1])
-            input_arr[i1, i2, 0] = p_c[0]
-            input_arr[i1, i2, 1] = p_c[1]
-            input_arr[i1, i2, 2] = p_c[2]
-
-
 def draw(dt):
-    global render_arr
-
-    render_arr[:, :] = background_color
-    render(render_arr, particles, goal_forces, particle_color)
-    pg.surfarray.pixels3d(screen)[:] = render_arr
+    screen.fill(background_color)
+    rnd.render_points(particles, particle_color, pg.surfarray.pixels3d(screen))
     text = small_font.render("%.3f" % (clock.get_fps()), True, (100, 80, 80))
     screen.blit(text, (10, 5))
     if 1 < pg.mouse.get_pos()[0] < window_size[0] - 1 and 1 < pg.mouse.get_pos()[1] < window_size[1] - 1:

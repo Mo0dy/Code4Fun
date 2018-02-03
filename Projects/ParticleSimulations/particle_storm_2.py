@@ -113,12 +113,11 @@ def toggle_attraction():
     global particle_attraction_mouse
     particle_attraction_mouse *= -1
 
-
 init()
 # Main Loop:
 loop = True
 while loop:
-    clock.tick()
+    clock.tick(60)
 
     for e in pg.event.get():
         if e.type == pg.QUIT:
