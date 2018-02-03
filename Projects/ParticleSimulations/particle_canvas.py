@@ -2,7 +2,6 @@ import pygame as pg
 import numpy as np
 import numba as nb
 import pygame.gfxdraw
-import datetime
 import os
 import Code4Fun.Utility.Renderer as rnd
 import time
@@ -19,30 +18,32 @@ surfpos = np.array([0, 0], dtype=np.int32)
 
 # settings
 # simulation
+# this has to be integers
 particle_density = 3
+# the particle amount is displayed on the right. if this runs out the program crashes (increase the amount)
 particle_amount = 47000 * particle_density
 par_mouse_attract_init = 0.1
+# attraction to goals
 particle_attraction_init = 2
+# the force with which the particles drift away if not needet
 particle_disburtion_init = -0.01
 drag_coeff_init = 0.04
-# drag_coeff = 0.05
+# this moves the particles randomly
 random_factor_init = 0.4
-lineheight = 20
-# this has to be integers
-
+window_size = 800, 250
+# the bounds the particles reflect of
+x_bounds_init = [-500, window_size[0] + 500]
+y_bounds_init = [-100, window_size[1] + 100]
 
 # display
 pg.init()
-window_size = 800, 250
-x_bounds_init = [-500, window_size[0] + 500]
-y_bounds_init = [-100, window_size[1] + 100]
 screen = pg.display.set_mode(window_size)  # , pg.NOFRAME)
 pg.display.set_caption("Particle Clock")
-# background_color = 206, 195, 163
-# particle_color = np.array([206, 59, 22], dtype=int)
 background_color = np.array([20, 20, 20], dtype=np.uint8)
 particle_color = np.array([142, 136, 8], dtype=np.uint8)
+# for rendering fps
 small_font = pg.font.SysFont("comicsansms", 10)
+# for writing stuff to the display
 display_font = pg.font.SysFont("caolibri", 250)
 pg.mouse.set_visible(False)
 
@@ -153,6 +154,7 @@ def toggle_attraction():
     particle_attraction_mouse *= -1
 
 
+# modify this function
 def animation():
     global update_animation
     if update_animation:
