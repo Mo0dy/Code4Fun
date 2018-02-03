@@ -29,3 +29,12 @@ def render_points(points, color, output):
             output[i1, i2, 0] = color[0]
             output[i1, i2, 1] = color[1]
             output[i1, i2, 2] = color[2]
+
+
+@nb.guvectorize([(nb.uint8[:, :, :], nb.uint8[:])], '(a,b,c),(c)', target='parallel')
+def fill(input, color):
+    for i in range(input.shape[0]):
+        for j in range(input.shape[1]):
+            input[i, j, 0] = color[0]
+            input[i, j, 1] = color[1]
+            input[i, j, 2] = color[2]

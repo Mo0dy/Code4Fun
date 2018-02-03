@@ -4,7 +4,7 @@ import numba as nb
 import pygame.gfxdraw
 import datetime
 import os
-from Code4Fun.Utility.Renderer import render_points
+import Code4Fun.Utility.Renderer as rnd
 
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (50, 100)
@@ -28,7 +28,7 @@ screen = pg.display.set_mode(window_size)  # , pg.NOFRAME)
 pg.display.set_caption("Particle Storm")
 # background_color = 206, 195, 163
 # particle_color = np.array([206, 59, 22], dtype=int)
-background_color = 20, 20, 20
+background_color = np.array([20, 20, 20], dtype=np.uint8)
 particle_color = np.array([142, 136, 8], dtype=np.uint8)
 small_font = pg.font.SysFont("comicsansms", 10)
 pg.mouse.set_visible(False)
@@ -53,8 +53,6 @@ gravity = gravity_init * 0
 render_arr = np.zeros((window_size[0], window_size[1], 3), dtype=np.int32)
 
 last_second = -1
-
-
 
 
 def init():
@@ -98,12 +96,12 @@ def update(p, vel, f, drag, m_p, m_attrack, ran_fac, delta_time, x_b, y_b, grav,
         p[i, 1] += vel[i, 1] * delta_time
 
 
-def draw(dt):
+def draw():
     global render_arr
 
     screen.fill(background_color)
-    render_points(particles, particle_color, pg.surfarray.pixels3d(screen))
-    text = small_font.render("%.3f" % (1 / dt), True, (100, 80, 80))
+    rnd.render_points(particles, particle_color, pg.surfarray.pixels3d(screen))
+    text = small_font.render("%.3f" % clock.get_fps(), True, (100, 80, 80))
     screen.blit(text, (10, 5))
     if 1 < pg.mouse.get_pos()[0] < window_size[0] - 1 and 1 < pg.mouse.get_pos()[1] < window_size[1] - 1:
         pg.gfxdraw.aacircle(screen, pg.mouse.get_pos()[0], pg.mouse.get_pos()[1], 5, (94, 34, 14))
@@ -121,7 +119,6 @@ init()
 loop = True
 while loop:
     clock.tick()
-    dt = clock.get_time() / 1000
 
     for e in pg.event.get():
         if e.type == pg.QUIT:
@@ -145,7 +142,6 @@ while loop:
                 particle_attraction_mouse = par_mouse_attract_init
 
     mouse_pos = np.array(pg.mouse.get_pos(), dtype=np.float32)
-
     update(particles, velocities, forces, drag_coeff, mouse_pos, particle_attraction_mouse, random_factor, 1.2, x_bounds, y_bounds, gravity, border_force) # dt * 35)
-    draw(dt)
+    draw()
 
