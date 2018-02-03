@@ -59,7 +59,7 @@ y_bounds = y_bounds_init
 particles = np.zeros((particle_amount, 2), dtype=np.float32)
 velocities = np.zeros((particle_amount, 2), dtype=np.float32)
 forces = np.zeros((particle_amount, 2), dtype=np.float32)
-init_goals = np.column_stack((np.linspace(50, 750, particle_amount, dtype=np.float32), np.random.rand(particle_amount) * 20 + lineheight)).astype(np.float32)
+init_goals = np.column_stack((np.linspace(50, 750, particle_amount, dtype=np.float32), np.random.rand(particle_amount) * 20)).astype(np.float32)
 goals = init_goals
 goal_forces = np.ones(particle_amount)
 clock = pg.time.Clock()
