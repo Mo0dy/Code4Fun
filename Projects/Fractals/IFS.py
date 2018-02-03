@@ -24,7 +24,7 @@ mb_pressed = False
 last_mouse_pos = Vec2(pg.mouse.get_pos()[0], pg.mouse.get_pos()[1])
 
 # Variables
-points = np.zeros((500000, 2), dtype=np.float32)
+points = np.zeros((1000000, 2), dtype=np.float32)
 dummy = np.zeros(window_size, dtype=np.uint8)
 
 def vec_mouse_pos():
@@ -99,6 +99,7 @@ def draw():
 
     text = font.render(str(clock.get_fps()), True, (100, 100, 100))
     screen.blit(text, (100, 100))
+
 
 def rotate(amount):
     t.trans(-1 * origin)
