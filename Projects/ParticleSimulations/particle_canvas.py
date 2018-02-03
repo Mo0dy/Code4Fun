@@ -11,7 +11,7 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (500, 300)
 
 
 # goal_surface:
-goal_size = [800, 250]
+goal_size = [800, 800]
 goal_surf = pg.Surface(goal_size)
 surfpos = np.array([0, 0], dtype=np.int32)
 
@@ -30,7 +30,7 @@ particle_disburtion_init = -0.01
 drag_coeff_init = 0.04
 # this moves the particles randomly
 random_factor_init = 0.4
-window_size = 800, 250
+window_size = goal_size
 # the bounds the particles reflect of
 x_bounds_init = [-500, window_size[0] + 500]
 y_bounds_init = [-100, window_size[1] + 100]
@@ -154,6 +154,15 @@ def toggle_attraction():
     particle_attraction_mouse *= -1
 
 
+def forier(sin_fac, cos_fac):
+    result = 0
+    for i in range(len(sin_fac)):
+        result += sin_fac[i] * np.sin(time.time() * 1 / (i + 1))
+    for i in range(len(cos_fac)):
+        result += cos_fac[i] * np.cos(time.time() * 1 / (i + 1))
+    return np.clip(int(result), 0, 300)
+
+
 # modify this function
 def animation():
     global update_animation
@@ -162,7 +171,7 @@ def animation():
         goal_surf.fill(0)
 
         # drawing code here
-        pg.draw.circle(goal_surf, 1, (int(np.sin(time.time()) * 200) + 300, 150), 100)
+        pg.draw.circle(goal_surf, 1, (int(np.sin(time.time()) * 200 + window_size[0] / 2), int(np.cos(time.time()) * 200 + window_size[0] / 2)), forier([10, -5, 5, 3], [10. -5]) + 50)
         update_goals()
 
 

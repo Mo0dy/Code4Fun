@@ -2,7 +2,7 @@ import numba as nb
 import numpy as np
 
 
-@nb.guvectorize([(nb.float64[:, :], nb.float64, nb.float64, nb.float64, nb.float64, nb.float64[:, :])], '(a,b),(),(),(),()->(a,b)', target='parallel')
+@nb.guvectorize([(nb.float64[:, :], nb.float64, nb.float64, nb.float64, nb.float64, nb.float64[:, :])], '(a,b),(),(),(),()->(a,b)', target='parallel', cache=True)
 def clip(p, x_min, x_max, y_min, y_max, output):
     for i in range(p.shape[0]):
         if p[i, 0] < x_min:
@@ -20,7 +20,7 @@ def clip(p, x_min, x_max, y_min, y_max, output):
             output[i, 1] = p[i, 1]
 
 
-@nb.guvectorize([(nb.float64[:, :], nb.uint8[:], nb.uint8[:, :, :])], '(a,b),(e),(c,d,e)', target='parallel')
+@nb.guvectorize([(nb.float64[:, :], nb.uint8[:], nb.uint8[:, :, :])], '(a,b),(e),(c,d,e)', target='parallel', cache=True)
 def render_points(points, color, output):
     for i in range(points.shape[0]):
         i1 = nb.int32(points[i, 0])
@@ -31,7 +31,7 @@ def render_points(points, color, output):
             output[i1, i2, 2] = color[2]
 
 
-@nb.guvectorize([(nb.uint8[:, :, :], nb.uint8[:])], '(a,b,c),(c)', target='parallel')
+@nb.guvectorize([(nb.uint8[:, :, :], nb.uint8[:])], '(a,b,c),(c)', target='parallel', cache=True)
 def fill(input, color):
     for i in range(input.shape[0]):
         for j in range(input.shape[1]):

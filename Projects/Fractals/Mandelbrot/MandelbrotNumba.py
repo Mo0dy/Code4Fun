@@ -1,6 +1,6 @@
 import numpy as np
 import pygame as pg
-from TopLevel.Vec2 import Vec2
+from Code4Fun.Utility.Vec2 import Vec2
 from copy import deepcopy
 from numba import jit, vectorize, guvectorize, float64, complex64, int32, float32, int64
 import time

@@ -1,4 +1,3 @@
-from MyMaths.Random import random_int
 import pygame
 import numpy as np
 from numba import jit, vectorize, guvectorize, float64, complex64, int32, float32, int64
@@ -31,7 +30,7 @@ walker_amount = 30
 
 def new_walker():
     edge_len = size[0] * 2 + size[1] * 2
-    ran_pos = random_int(edge_len)
+    ran_pos = np.random.random_integers(0, edge_len)
     if ran_pos < size[0]:
         x = ran_pos
         y = 0
@@ -80,7 +79,6 @@ while loop:
         if e.type == pygame.QUIT:
             loop = False
 
-
     # Do a random Step
     steps = (np.random.rand(walker_amount, 2) - 0.5) * 2 * walker_vel
     walkers = np.add(walkers, steps)
@@ -111,8 +109,6 @@ while loop:
         for w in tree_int:
             pygame.draw.circle(screen, (255, 0, 0), tuple(w), walker_size)
 
-        # for i in range(walkers.shape[0]):
-        #     pygame.draw.circle(screen, (50, 200, 50), (int(walkers[i, 0]), int(walkers[i, 1])), int(np.clip(dists[i], 2, 1000)), 1)
         pygame.display.flip()
 
     iterator += 1

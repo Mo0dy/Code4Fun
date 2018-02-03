@@ -81,7 +81,7 @@ def update_goals():
     fast_update_goals(goals, goal_arr, surfpos, goal_forces, particle_attraction)
 
 
-@nb.guvectorize([(nb.float32[:, :], nb.int32[:, :], nb.int32[:], nb.float32[:], nb.float32)], '(a,b),(c,d),(e),(a),()', target='parallel')
+@nb.guvectorize([(nb.float32[:, :], nb.int32[:, :], nb.int32[:], nb.float32[:], nb.float32)], '(a,b),(c,d),(e),(a),()', target='parallel', cache=True)
 def fast_update_goals(g, input_array, offset, g_f, attrac_f):
     index = 0
     for i in range(input_array.shape[0]):
@@ -94,7 +94,7 @@ def fast_update_goals(g, input_array, offset, g_f, attrac_f):
                     index += 1
 
 
-@nb.guvectorize([(nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:], nb.float32, nb.float32[:], nb.float32, nb.float32, nb.float32, nb.int32[:], nb.int32[:])], '(a,b),(a,b),(a,b),(a,b),(a),(),(c),(),(),(),(d),(d)', target='parallel')
+@nb.guvectorize([(nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32[:], nb.float32, nb.float32[:], nb.float32, nb.float32, nb.float32, nb.int32[:], nb.int32[:])], '(a,b),(a,b),(a,b),(a,b),(a),(),(c),(),(),(),(d),(d)', target='parallel', cache=True)
 def update(p, vel, f, goal_pos, goal_attract, drag, m_p, m_attrack, ran_fac, delta_time, x_b, y_b):
     border_force = 0.1
     if m_attrack == 0:
@@ -107,10 +107,13 @@ def update(p, vel, f, goal_pos, goal_attract, drag, m_p, m_attrack, ran_fac, del
         dist = np.sqrt(d_x ** 2 + d_y ** 2)
         m_d_x = m_p[0] - p[i, 0]
         m_d_y = m_p[1] - p[i, 1]
+
         m_dist = np.sqrt(m_d_x ** 2 + m_d_y ** 2)
         vel_mul = np.sqrt(vel[i, 0] ** 2 + vel[i, 1] ** 2)
-        f[i, 0] = d_x * goal_attract[i] / dist - vel[i, 0] * drag * vel_mul + (np.random.rand() - 0.5) * ran_fac + m_d_x * m_attrack / m_dist
-        f[i, 1] = d_y * goal_attract[i] / dist - vel[i, 1] * drag * vel_mul + (np.random.rand() - 0.5) * ran_fac + m_d_y * m_attrack / m_dist + grav
+        f[i, 0] = d_x * goal_attract[i] / dist - vel[i, 0] * drag * vel_mul + (
+                np.random.rand() - 0.5) * ran_fac + m_d_x * m_attrack / m_dist
+        f[i, 1] = d_y * goal_attract[i] / dist - vel[i, 1] * drag * vel_mul + (
+                np.random.rand() - 0.5) * ran_fac + m_d_y * m_attrack / m_dist + grav
 
         # right
         if x_b[1] < p[i, 0]:
@@ -134,7 +137,7 @@ def update(p, vel, f, goal_pos, goal_attract, drag, m_p, m_attrack, ran_fac, del
         p[i, 1] += vel[i, 1] * delta_time
 
 
-def draw(dt):
+def draw():
     screen.fill(background_color)
     rnd.render_points(particles, particle_color, pg.surfarray.pixels3d(screen))
     text = small_font.render("%.3f" % (clock.get_fps()), True, (100, 80, 80))
@@ -166,7 +169,6 @@ init()
 loop = True
 while loop:
     clock.tick(60)
-    dt = clock.get_time() / 1000
 
     for e in pg.event.get():
         if e.type == pg.QUIT:
@@ -197,5 +199,5 @@ while loop:
         y_bounds = y_bounds_init
 
     update(particles, velocities, forces, goals, goal_forces, drag_coeff, mouse_pos, particle_attraction_mouse, random_factor, 1.2, x_bounds, y_bounds) # dt * 35)
-    draw(dt)
+    draw()
 

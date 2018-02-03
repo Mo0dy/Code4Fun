@@ -1,9 +1,10 @@
 import pygame as pg
 import time
-from TopLevel.WalkingSim.WalkingClasses import *
+from Code4Fun.Projects.WalkingSim.WalkingClasses import *
 import random
-import MyMaths as oldmath
-from bettermaths import *
+import numpy as np
+
+from Code4Fun.Utility.Vec2 import *
 
 
 size = [1200, 600]
@@ -24,7 +25,7 @@ screen = pg.display.set_mode(size)
 
 
 def random_node():
-    return Node((oldmath.random_int(300, 800), oldmath.random_int(50, 400)))
+    return Node((np.random.random_integers(300, 800), np.random.random_integers(50, 400)))
 
 
 # nodes = [Node((random.random() * size[0], random.random() * size[0] / 2 - GROUND_HEIGHT)) for i in range(10)]

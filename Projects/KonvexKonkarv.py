@@ -1,7 +1,8 @@
-from MyMaths import *
+from Code4Fun.Utility.Vec2 import *
 import pygame
 import random
 import time
+import math
 from copy import deepcopy
 
 size = [600, 600]

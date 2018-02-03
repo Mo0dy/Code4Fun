@@ -1,4 +1,4 @@
-from MyMaths.Vec2 import Vec2
+from Code4Fun.Utility.Vec2 import Vec2
 import pygame as pg
 import numpy as np
 from random import random

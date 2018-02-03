@@ -64,7 +64,7 @@ def init():
     velocities = np.zeros((particle_amount, 2), dtype=np.float32)
 
 
-@nb.guvectorize([(nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32, nb.float32[:], nb.float32, nb.float32, nb.float32, nb.int32[:], nb.int32[:], nb.float32, nb.float32)], '(a,b),(a,b),(a,b),(),(c),(),(),(),(d),(d),(),()', target='parallel')
+@nb.guvectorize([(nb.float32[:, :], nb.float32[:, :], nb.float32[:, :], nb.float32, nb.float32[:], nb.float32, nb.float32, nb.float32, nb.int32[:], nb.int32[:], nb.float32, nb.float32)], '(a,b),(a,b),(a,b),(),(c),(),(),(),(d),(d),(),()', target='parallel', cache=True)
 def update(p, vel, f, drag, m_p, m_attrack, ran_fac, delta_time, x_b, y_b, grav, b_force):
     for i in range(p.shape[0]):
         m_d_x = m_p[0] - p[i, 0]

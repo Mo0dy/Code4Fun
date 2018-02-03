@@ -1,22 +1,17 @@
 import pygame
 import numpy as np
-# import numba as nb
-# import pycuda
 import pygame.surfarray as surfarray
-from scipy.ndimage import convolve
+from numba import jit, vectorize, guvectorize, float64, complex64, int32, float32, int64
 import random
+import time
+import Code4Fun.Utility.Renderer as rnd
 
 
 # Constants =======================================================================================
 size_x = size_y = 200
 laplace_mat = np.array([[0.05, 0.2, 0.05],
                         [0.2, -1, 0.2],
-                        [0.05, 0.2, 0.05]])
-
-# options are always of the shape:
-# [f, k]
-
-# import options:
+                        [0.05, 0.2, 0.05]], dtype=np.float32)
 
 my_file = open("ReactionDiffusion.txt", "r")
 lines = my_file.readlines()
@@ -50,28 +45,21 @@ initarray = surfarray.pixels2d(initscreen)
 change = 0.001
 
 
-D_A = 1
-D_B = 0.5
+D_A = float32(1)
+D_B = float32(0.5)
 
-f = options[option][0]
-k = options[option][1]
+f = float32(options[option][0])
+k = float32(options[option][1])
 
-grid = np.array([[[1, 0, 0] for i in range(size_x)] for j in range(size_y)], dtype=float)
-n_grid = np.array([[[0, 0, 0] for i in range(size_x)] for j in range(size_y)], dtype=float)
+grid = np.array([[[1, 0, 0] for i in range(size_x)] for j in range(size_y)], dtype=np.float32)
+n_grid = np.array([[[0, 0, 0] for i in range(size_x)] for j in range(size_y)], dtype=np.float32)
 
 
 # Setup
-# pygame.draw.rect(initscreen, 1, pygame.Rect(120, 120, 60, 60))
-# pygame.draw.rect(initscreen, 1, pygame.Rect(10, 10, 10, 280))
-# pygame.draw.rect(initscreen, 1, pygame.Rect(280, 10, 10, 280))
-# pygame.draw.rect(initscreen, 1, pygame.Rect(120, 120, 60, 60))
 pygame.draw.circle(initscreen, 1, (int(size_x / 2), int(size_y / 2)), 10, 1)
-# pygame.draw.circle(initscreen, 1, (150, 180), 50, 1)
 grid[:, :, 1] = initarray
 original = 0
 buffer = [grid, n_grid]
-
-
 
 
 def save():
@@ -81,6 +69,7 @@ def save():
     my_file.write(name + " " + str(f) + " " + str(k) + "\n")
     my_file.close()
     print("saved")
+
 
 def command():
     global f
@@ -96,6 +85,31 @@ def command():
         k = options[stack[1]][1]
     print("done")
 
+
+@guvectorize([(float32[:, :, :], float32[:, :], float32, float32, float32, float32, float32[:, :, :])], '(x,y,z),(a,a),(),(),(),()->(x,y,z)', target='parallel', nopython=True)
+def update(original_a, lap_mat, kill, feed, Da, Db, new_a):
+    for i in range(original_a.shape[0] - 2):
+        for j in range(original_a.shape[1] - 2):
+            ii = i + 1
+            jj = j + 1
+            sumA = 0
+            sumB = 0
+            for a in range():
+                for b in range(3):
+                    sumA += original_a[i + a, j + b, 0] * lap_mat[a, b]
+                    sumB += original_a[i + a, j + b, 1] * lap_mat[a, b]
+            new_a[ii, jj, 0] = original_a[ii, jj, 0] * (1 - feed - original_a[ii, jj, 1] * original_a[ii, jj, 1]) + feed + Da * sumA
+            new_a[ii, jj, 1] = original_a[ii, jj, 1] * (1 - kill - feed + original_a[ii, jj, 1] * original_a[ii, jj, 0]) + Db * sumB
+
+            if new_a[ii, jj, 0] > 1:
+                new_a[ii, jj, 0] = 1
+            elif new_a[ii, jj, 0] < 0:
+                new_a[ii, jj, 0] = 0
+
+            if new_a[ii, jj, 1] > 1:
+                new_a[ii, jj, 1] = 1
+            elif new_a[ii, jj, 1] < 0:
+                new_a[ii, jj, 1] = 0
 
 drawA = False
 draw = False
@@ -157,8 +171,8 @@ while loop:
 
 
     # Updating
-    new[:, :, 0] = np.clip(orig[:, :, 0] * (1 - f - np.square(orig[:, :, 1])) + f + D_A * convolve(orig[:, :, 0], laplace_mat), 0, 1)
-    new[:, :, 1] = np.clip(orig[:, :, 1] * (1 - k - f + orig[:, :, 1] * orig[:, :, 0]) + D_B * convolve(orig[:, :, 1], laplace_mat), 0, 1)
+    start_time = time.time()
+    update(orig, laplace_mat, k, f, D_A, D_B, new)
 
     # Rendering
     if drawA:

@@ -1,4 +1,4 @@
-from MyMaths.Vec2 import *
+from Code4Fun.Utility.Vec2 import *
 import pygame as pg
 
 DAMPENING_COEFF = 150
