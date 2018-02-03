@@ -4,6 +4,7 @@ import numba as nb
 import pygame.gfxdraw
 import datetime
 import os
+from Code4Fun.Utility.Renderer import render_points
 
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (50, 100)
@@ -28,7 +29,7 @@ pg.display.set_caption("Particle Storm")
 # background_color = 206, 195, 163
 # particle_color = np.array([206, 59, 22], dtype=int)
 background_color = 20, 20, 20
-particle_color = np.array([142, 136, 8], dtype=int)
+particle_color = np.array([142, 136, 8], dtype=np.uint8)
 small_font = pg.font.SysFont("comicsansms", 10)
 pg.mouse.set_visible(False)
 border_force_init = 0.1
@@ -97,23 +98,11 @@ def update(p, vel, f, drag, m_p, m_attrack, ran_fac, delta_time, x_b, y_b, grav,
         p[i, 1] += vel[i, 1] * delta_time
 
 
-@nb.guvectorize([(nb.int32[:, :, :], nb.float32[:, :], nb.int32[:])], '(a,b,c),(d,e),(c)', target='parallel')
-def render(input_arr, p, p_c):
-    for i in range(p.shape[0]):
-        if 0 < p[i, 0] < input_arr.shape[0] and 0 < p[i, 1] < input_arr.shape[1]:
-            i1 = nb.int32(p[i, 0])
-            i2 = nb.int32(p[i, 1])
-            input_arr[i1, i2, 0] = p_c[0]
-            input_arr[i1, i2, 1] = p_c[1]
-            input_arr[i1, i2, 2] = p_c[2]
-
-
 def draw(dt):
     global render_arr
 
-    render_arr[:, :] = background_color
-    render(render_arr, particles, particle_color)
-    pg.surfarray.pixels3d(screen)[:] = render_arr
+    screen.fill(background_color)
+    render_points(particles, particle_color, pg.surfarray.pixels3d(screen))
     text = small_font.render("%.3f" % (1 / dt), True, (100, 80, 80))
     screen.blit(text, (10, 5))
     if 1 < pg.mouse.get_pos()[0] < window_size[0] - 1 and 1 < pg.mouse.get_pos()[1] < window_size[1] - 1:
@@ -131,7 +120,7 @@ init()
 # Main Loop:
 loop = True
 while loop:
-    clock.tick(60)
+    clock.tick()
     dt = clock.get_time() / 1000
 
     for e in pg.event.get():
