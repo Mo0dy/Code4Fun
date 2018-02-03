@@ -1,5 +1,5 @@
 import numpy as np
-from MyMaths.Vec2 import Vec2
+from Code4Fun.Utility.Vec2 import Vec2
 import numba as nb
 
 
@@ -42,24 +42,6 @@ def transform_numba(vectors, mat, output):
     for i in range(vectors.shape[0]):
         output[i, 0] = mat[0, 0] * vectors[i, 0] + mat[0, 1] * vectors[i, 1] + mat[0, 2]
         output[i, 1] = mat[1, 0] * vectors[i, 0] + mat[1, 1] * vectors[i, 1] + mat[1, 2]
-
-
-@nb.guvectorize([(nb.float64[:, :], nb.float64, nb.float64, nb.float64, nb.float64, nb.float64[:, :])], '(a,b),(),(),(),()->(a,b)', target='parallel')
-def clip(p, x_min, x_max, y_min, y_max, output):
-    for i in range(p.shape[0]):
-        if p[i, 0] < x_min:
-            output[i, 0] = x_min
-        elif p[i, 0] > x_max:
-            output[i, 0] = x_max
-        else:
-            output[i, 0] = p[i, 0]
-
-        if p[i, 1] < y_min:
-            output[i, 1] = y_min
-        elif p[i, 1] > y_max:
-            output[i, 1] = y_max
-        else:
-            output[i, 1] = p[i, 1]
 
 
 class Transformation(object):

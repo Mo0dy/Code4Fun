@@ -84,7 +84,6 @@ class Vec2(object):
     @property
     def theta(self):
         return np.arctan2(self.x, self.y)
-        return np.angle(self.x + self.y * 1j)
 
     @theta.setter
     def theta(self, value):

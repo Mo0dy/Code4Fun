@@ -1,5 +1,6 @@
-from MyMaths.Vec2 import *
-from MyMaths.Transform import *
+from Code4Fun.Utility.Vec2 import *
+from Code4Fun.Utility.Transform import *
+from Code4Fun.Utility.Renderer import *
 import numpy as np
 import pygame as pg
 import numba as nb
@@ -24,7 +25,7 @@ last_mouse_pos = Vec2(pg.mouse.get_pos()[0], pg.mouse.get_pos()[1])
 
 # Variables
 points = np.zeros((500000, 2), dtype=np.float32)
-
+dummy = np.zeros(window_size, dtype=np.uint8)
 
 def vec_mouse_pos():
     return Vec2(pg.mouse.get_pos()[0], pg.mouse.get_pos()[1])
@@ -89,25 +90,16 @@ def update(dt):
         move_screen()
 
 
-import TimeTest
-draw_test = TimeTest.Tester("draw_test")
-
-
 def draw():
-    global points
-    draw_test.loop_start()
-    draw_test.timestamp("init")
+    global points, render_arr
+    # render_arr[:, :] = (50, 50, 50)
     screen.fill((50, 50, 50))
-    color = np.array([255, 255, 255])
-    draw_test.timestamp("transform, clip")
+    color = np.array([255, 255, 255], dtype=np.uint8)
     draw_points = clip(t * points, 0, window_size[0] - 1, 0, window_size[1] - 1)
-    draw_test.timestamp("assign")
-    pg.surfarray.pixels3d(screen)[draw_points[:, 0].astype(int), draw_points[:, 1].astype(int)] = color
-    draw_test.timestamp("rest")
+    render_points(draw_points, color, pg.surfarray.pixels3d(screen))
 
     text = font.render(str(clock.get_fps()), True, (100, 100, 100))
     screen.blit(text, (100, 100))
-    draw_test.loop_end()
 
 def rotate(amount):
     t.trans(-1 * origin)
