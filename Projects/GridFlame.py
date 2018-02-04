@@ -3,9 +3,9 @@ import numpy as np
 import pygame as pg
 from scipy.ndimage.filters import convolve
 
-mat_shape = np.array([8, 8, 3])
-margins = 10
-resolution = 2
+mat_shape = np.array([16, 16, 3])
+margins = 2
+resolution = 1
 content = np.zeros(mat_shape)
 heat_mat = np.zeros(mat_shape[:2] * resolution, dtype=np.float)
 
@@ -28,6 +28,7 @@ value = np.reshape(np.random.random_integers(2, 25, 9), (3, 3)) * 10
 
 
 def color_temperature(temp):
+    temp = temp * 0.2 + 11
     if temp <= 66:
         r = 255
     else:
@@ -49,6 +50,14 @@ def color_temperature(temp):
     return np.clip(np.array([r, g, b], dtype=int), 0, 255)
 
 
+def color_linear(temp):
+    temp *= 2
+    if temp < 255:
+        return temp, 0, 0
+    elif temp < 510:
+        return 255, np.clip(510 - temp, 0, 255), 0
+
+
 def reset():
     global heat_mat
     # for i in range(10, 30):
@@ -65,12 +74,12 @@ def update():
     global heat_mat, value
     # sparking flame:
     if np.random.rand() < 0.1:
-        value = np.reshape(np.random.random_integers(2, 25, 9), (3, 3)) * 10
+        value = np.reshape(np.random.random_integers(2, 25, 9), (3, 3)) * 8
     heat_mat[7:10, 13:16] = value
     # diffusion
     heat_mat = heat_mat + convolve(heat_mat, con_mat)
     # cooling
-    heat_mat -= 5
+    heat_mat -= 2
     heat_mat = np.clip(heat_mat, 0, 1000000)
     for i in range(content.shape[0]):
         for j in range(content.shape[1]):
@@ -78,7 +87,7 @@ def update():
 
     for i in range(content.shape[0]):
         for j in range(content.shape[1]):
-            content[i, j] = color_temperature(content[i, j, 0] * 0.2 + 11)
+            content[i, j] = color_linear(content[i, j, 0])
 
 
 def draw():
