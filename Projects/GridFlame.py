@@ -3,8 +3,8 @@ import numpy as np
 import pygame as pg
 from scipy.ndimage.filters import convolve
 
-mat_shape = np.array([16, 16, 3])
-margins = 2
+mat_shape = np.array([32, 32, 3])
+margins = 0
 resolution = 1
 content = np.zeros(mat_shape)
 heat_mat = np.zeros(mat_shape[:2] * resolution, dtype=np.float)
@@ -18,7 +18,7 @@ con_mat = np.array([[0.07, 0.2, 0.03],
                     [0.07, 0.2, 0.03]])
 
 pg.init()
-window_size = 800, 800
+window_size = 320, 320
 origin = Vec2(np.array(window_size)) / 2
 screen = pg.display.set_mode(window_size)
 pg.display.set_caption("test")
@@ -73,13 +73,13 @@ def clear():
 def update():
     global heat_mat, value
     # sparking flame:
-    if np.random.rand() < 0.1:
+    if np.random.rand() < 0.3:
         value = np.reshape(np.random.random_integers(2, 25, 9), (3, 3)) * 8
-    heat_mat[7:10, 13:16] = value
+    heat_mat[15:18, 20:23] = value
     # diffusion
     heat_mat = heat_mat + convolve(heat_mat, con_mat)
     # cooling
-    heat_mat -= 2
+    heat_mat -= 0.5
     heat_mat = np.clip(heat_mat, 0, 1000000)
     for i in range(content.shape[0]):
         for j in range(content.shape[1]):
@@ -91,8 +91,13 @@ def update():
 
 
 def draw():
+    global content
     size_x = window_size[0] / content.shape[0]
     size_y = window_size[1] / content.shape[1]
+
+    # adding candle:
+    content[14:19, 25:32] = [150, 150, 8]
+    content[15:18, 25:32] = [200, 200, 10]
 
     for i in range(content.shape[0]):
         for j in range(content.shape[1]):
@@ -112,7 +117,10 @@ while loop:
         if e.type == pg.QUIT:
             loop = False
         elif e.type == pg.KEYDOWN:
-            keydown_func[e.key]()
+            try:
+                keydown_func[e.key]()
+            except:
+                pass
 
     update()
     screen.fill((50, 50, 50))
