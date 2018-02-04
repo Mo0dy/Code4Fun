@@ -9,13 +9,29 @@ con_mat = np.array([[0.07, 0.2, 0.03],
                     [0.07, 0.2, 0.03]])
 
 
-value = np.reshape(np.random.random_integers(2, 25, 9), (3, 3)) * 8
+
+def update_ignition_values():
+    global ignition_values
+    ignition_values = np.reshape(np.random.random_integers(2, 25, ign_dx * 4 * ign_dy), (ign_dx * 2, ign_dy * 2)) * 8
 
 
 def init(mat_shape, res):
-    global heat_mat, resolution
+    global heat_mat, resolution, ignition_area, ign_dx, ign_dy, candle_area
     resolution = res
     heat_mat = np.zeros(mat_shape[:2] * resolution, dtype=np.float)
+    ign_x = int(heat_mat.shape[0] / 2)
+    ign_y = int(heat_mat.shape[1] * 0.8)
+    ign_dy = int(heat_mat.shape[1] * 0.05)
+    ign_dx = int(heat_mat.shape[0] * 0.05)
+    ignition_area = np.array([[ign_x - ign_dx, ign_x + ign_dx], [ign_y - ign_dy, ign_y + ign_dy]])
+
+    candle_x = int(mat_shape[0] / 2)
+    candle_y = int(mat_shape[1])
+    candle_dy = int(mat_shape[1] * 0.1)
+    candle_dx = int(mat_shape[0] * 0.05)
+
+    candle_area = np.array([[candle_x - candle_dx, candle_x + candle_dx], [candle_y - candle_dy, candle_y]])
+    update_ignition_values()
 
 
 def color_temperature(temp):
@@ -50,11 +66,11 @@ def color_linear(temp):
 
 
 def update(content):
-    global heat_mat, value
+    global heat_mat
     # sparking flame:
-    if np.random.rand() < 0.3:
-        value = np.reshape(np.random.random_integers(2, 25, 9), (3, 3)) * 8
-    heat_mat[15:18, 20:23] = value
+    if np.random.rand() < 0.8:
+        update_ignition_values()
+    heat_mat[ignition_area[0][0]: ignition_area[0][1], ignition_area[1][0]: ignition_area[1][1]] = ignition_values
     # diffusion
     heat_mat = heat_mat + convolve(heat_mat, con_mat)
     # cooling
@@ -68,4 +84,4 @@ def update(content):
         for j in range(content.shape[1]):
             content[i, j] = color_linear(content[i, j, 0])
 
-    content[15:18, 25:32] = [200, 200, 10]
+    content[candle_area[0][0]: candle_area[0][1], candle_area[1][0]: candle_area[1][1]] = [200, 200, 10]

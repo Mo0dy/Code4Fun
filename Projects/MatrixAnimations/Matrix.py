@@ -4,7 +4,7 @@ import pygame as pg
 from scipy.ndimage.filters import convolve
 import Code4Fun.Projects.MatrixAnimations.GridFlame as gFlame
 
-mat_shape = np.array([32, 32, 3])
+mat_shape = np.array([40, 40, 3])
 margins = 0
 resolution = 1
 content = np.zeros(mat_shape)
@@ -13,7 +13,7 @@ gFlame.init(mat_shape, resolution)
 
 
 pg.init()
-window_size = mat_shape[0] * 10, mat_shape[1] * 10
+window_size = mat_shape[0] * 5, mat_shape[1] * 5
 origin = Vec2(np.array(window_size)) / 2
 screen = pg.display.set_mode(window_size)
 pg.display.set_caption("Matrix Animations")
