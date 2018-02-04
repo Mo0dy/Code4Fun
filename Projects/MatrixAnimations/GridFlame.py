@@ -3,28 +3,19 @@ import numpy as np
 import pygame as pg
 from scipy.ndimage.filters import convolve
 
-mat_shape = np.array([32, 32, 3])
-margins = 0
-resolution = 1
-content = np.zeros(mat_shape)
-heat_mat = np.zeros(mat_shape[:2] * resolution, dtype=np.float)
-
-con_mat = np.array([[0.05, 0.2, 0.05],
-                    [0.2, -1, 0.2],
-                    [0.05, 0.2, 0.05]])
 
 con_mat = np.array([[0.07, 0.2, 0.03],
                     [0.35, -1, 0.05],
                     [0.07, 0.2, 0.03]])
 
-pg.init()
-window_size = 320, 320
-origin = Vec2(np.array(window_size)) / 2
-screen = pg.display.set_mode(window_size)
-pg.display.set_caption("test")
-clock = pg.time.Clock()
-font = pg.font.SysFont("comicsansms", 50)
-value = np.reshape(np.random.random_integers(2, 25, 9), (3, 3)) * 10
+
+value = np.reshape(np.random.random_integers(2, 25, 9), (3, 3)) * 8
+
+
+def init(mat_shape, res):
+    global heat_mat, resolution
+    resolution = res
+    heat_mat = np.zeros(mat_shape[:2] * resolution, dtype=np.float)
 
 
 def color_temperature(temp):
@@ -58,19 +49,7 @@ def color_linear(temp):
         return 255, np.clip(510 - temp, 0, 255), 0
 
 
-def reset():
-    global heat_mat
-    # for i in range(10, 30):
-    #     for j in range(10, 20):
-    #         heat_mat[i, j] = 255
-
-
-def clear():
-    global content
-    content = np.zeros(mat_shape)
-
-
-def update():
+def update(content):
     global heat_mat, value
     # sparking flame:
     if np.random.rand() < 0.3:
@@ -89,41 +68,4 @@ def update():
         for j in range(content.shape[1]):
             content[i, j] = color_linear(content[i, j, 0])
 
-
-def draw():
-    global content
-    size_x = window_size[0] / content.shape[0]
-    size_y = window_size[1] / content.shape[1]
-
-    # adding candle:
-    content[14:19, 25:32] = [150, 150, 8]
     content[15:18, 25:32] = [200, 200, 10]
-
-    for i in range(content.shape[0]):
-        for j in range(content.shape[1]):
-            pg.draw.rect(screen, content[i, j], (i * size_x + margins, j * size_y + margins, size_x - margins * 2, size_y - margins * 2))
-
-
-keydown_func = {
-    pg.K_r: reset
-}
-
-
-reset()
-loop = True
-while loop:
-    clock.tick()
-    for e in pg.event.get():
-        if e.type == pg.QUIT:
-            loop = False
-        elif e.type == pg.KEYDOWN:
-            try:
-                keydown_func[e.key]()
-            except:
-                pass
-
-    update()
-    screen.fill((50, 50, 50))
-    draw()
-    pg.display.flip()
-pg.quit()
