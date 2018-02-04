@@ -3,17 +3,18 @@ import numpy as np
 import pygame as pg
 from scipy.ndimage.filters import convolve
 import Code4Fun.Projects.MatrixAnimations.GridFlame as gFlame
+import Code4Fun.Projects.MatrixAnimations.Rain as Rain
 
-mat_shape = np.array([40, 40, 3])
-margins = 0
+mat_shape = np.array([8, 8, 3])
+margins = 5
 resolution = 1
 content = np.zeros(mat_shape)
 
-gFlame.init(mat_shape, resolution)
+Rain.init(mat_shape, 10)
 
 
 pg.init()
-window_size = mat_shape[0] * 5, mat_shape[1] * 5
+window_size = mat_shape[0] * 100, mat_shape[1] * 100
 origin = Vec2(np.array(window_size)) / 2
 screen = pg.display.set_mode(window_size)
 pg.display.set_caption("Matrix Animations")
@@ -32,7 +33,7 @@ def clear():
 
 def update():
     global content
-    gFlame.update(content)
+    Rain.update(content)
 
 def draw():
     global content
@@ -52,7 +53,7 @@ keydown_func = {
 reset()
 loop = True
 while loop:
-    clock.tick()
+    clock.tick(20)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False

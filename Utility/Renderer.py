@@ -31,6 +31,17 @@ def render_points(points, color, output):
             output[i1, i2, 2] = color[2]
 
 
+@nb.guvectorize([(nb.float64[:, :], nb.uint8[:, :], nb.uint8[:, :, :])], '(a,b),(a,e),(c,d,e)', target='parallel', cache=True)
+def render_points_multicolor(points, color, output):
+    for i in range(points.shape[0]):
+        i1 = nb.int32(points[i, 0])
+        i2 = nb.int32(points[i, 1])
+        if 0 <= i1 < output.shape[0] and 0 <= i2 < output.shape[1]:
+            output[i1, i2, 0] = color[i, 0]
+            output[i1, i2, 1] = color[i, 1]
+            output[i1, i2, 2] = color[i, 2]
+
+
 @nb.guvectorize([(nb.uint8[:, :, :], nb.uint8[:])], '(a,b,c),(c)', target='parallel', cache=True)
 def fill(input, color):
     for i in range(input.shape[0]):

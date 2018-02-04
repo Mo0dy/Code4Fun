@@ -19,7 +19,7 @@ surfpos = np.array([0, 0], dtype=np.int32)
 # settings
 # simulation
 density = 3
-particle_amount = int(47000 * density)
+particle_amount = int(50000 * density)
 par_mouse_attract_init = 0.1
 particle_attraction_init = 2
 particle_disburtion_init = -0.01
@@ -44,6 +44,36 @@ particle_color = np.array([142, 136, 8], dtype=np.uint8)
 small_font = pg.font.SysFont("comicsansms", 10)
 display_font = pg.font.SysFont("caolibri", 250)
 pg.mouse.set_visible(False)
+
+point_color = np.zeros((particle_amount, 3), dtype=np.uint8)
+point_color[:] = particle_color
+point_color[-10000:-1] = np.array([255, 50, 50], dtype=np.uint8)
+
+
+def random_color(amount):
+    colors = np.random.rand(amount, 3) * 255
+    colors[:, 2] *= 0.2
+    return colors.astype(np.uint8)
+
+
+def rainbow_colors(amount):
+    colors = np.zeros((amount, 3), dtype=np.uint8)
+    part = int(amount / 4)
+    last_part = amount - 3 * part
+    colors[0:part, 0] = 255
+    colors[0:part, 1] = np.linspace(0, 255, part, dtype=np.uint8)
+
+    colors[part:part * 2, 1] = 255
+    colors[part:part * 2, 0] = np.linspace(255, 0, part, dtype=np.uint8)
+
+    colors[part * 2:part * 3, 1] = 255
+    colors[part * 2:part * 3, 2] = np.linspace(0, 255, part, dtype=np.uint8)
+
+    colors[part * 3:-1, 2] = 255
+    colors[part * 3:-1, 1] = np.linspace(255, 0, last_part - 1, dtype=np.uint8)
+    return colors
+
+point_color = random_color(particle_amount)
 
 
 # variables
@@ -77,7 +107,7 @@ def init():
 
 def update_goals():
     global goals, goal_forces
-    # goal_forces = np.zeros(particle_amount, dtype=np.float32)
+    goal_forces = np.zeros(particle_amount, dtype=np.float32)
     goal_forces = np.ones(particle_amount, dtype=np.float32) * particle_disburtion
     goal_arr[:] = pg.surfarray.pixels2d(goal_surf)
     fast_update_goals(goals, goal_arr, surfpos, goal_forces, particle_attraction, density)
@@ -143,6 +173,7 @@ def update(p, vel, f, goal_pos, goal_attract, drag, m_p, m_attrack, ran_fac, del
 def draw():
     screen.fill(background_color)
     rnd.render_points(particles, particle_color, pg.surfarray.pixels3d(screen))
+    # rnd.render_points_multicolor(particles, point_color, pg.surfarray.pixels3d(screen))
     text = small_font.render("%.3f" % (clock.get_fps()), True, (100, 80, 80))
     screen.blit(text, (10, 5))
     if 1 < pg.mouse.get_pos()[0] < window_size[0] - 1 and 1 < pg.mouse.get_pos()[1] < window_size[1] - 1:

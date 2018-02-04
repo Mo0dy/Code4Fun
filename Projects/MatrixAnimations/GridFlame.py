@@ -4,15 +4,23 @@ import pygame as pg
 from scipy.ndimage.filters import convolve
 
 
-con_mat = np.array([[0.07, 0.2, 0.03],
-                    [0.35, -1, 0.05],
-                    [0.07, 0.2, 0.03]])
+mul_dx = 0.2
+mul_dy = 0.2
+candle_mul_dx = 0.2
+candle_mul_dy = 0.2
+random_fac = 0.5
 
+cooldown = 5
+
+
+con_mat = np.array([[0.08, 0.05, 0.02],
+                    [0.48, -1, 0.02],
+                    [0.08, 0.05, 0.02]])
 
 
 def update_ignition_values():
     global ignition_values
-    ignition_values = np.reshape(np.random.random_integers(2, 25, ign_dx * 4 * ign_dy), (ign_dx * 2, ign_dy * 2)) * 8
+    ignition_values = np.reshape(np.random.random_integers(10, 28, ign_dx * 4 * ign_dy), (ign_dx * 2, ign_dy * 2)) * 8
 
 
 def init(mat_shape, res):
@@ -21,14 +29,14 @@ def init(mat_shape, res):
     heat_mat = np.zeros(mat_shape[:2] * resolution, dtype=np.float)
     ign_x = int(heat_mat.shape[0] / 2)
     ign_y = int(heat_mat.shape[1] * 0.8)
-    ign_dy = int(heat_mat.shape[1] * 0.05)
-    ign_dx = int(heat_mat.shape[0] * 0.05)
+    ign_dy = int(heat_mat.shape[1] * mul_dy)
+    ign_dx = int(heat_mat.shape[0] * mul_dx)
     ignition_area = np.array([[ign_x - ign_dx, ign_x + ign_dx], [ign_y - ign_dy, ign_y + ign_dy]])
 
     candle_x = int(mat_shape[0] / 2)
     candle_y = int(mat_shape[1])
-    candle_dy = int(mat_shape[1] * 0.1)
-    candle_dx = int(mat_shape[0] * 0.05)
+    candle_dy = int(mat_shape[1] * candle_mul_dy)
+    candle_dx = int(mat_shape[0] * candle_mul_dx)
 
     candle_area = np.array([[candle_x - candle_dx, candle_x + candle_dx], [candle_y - candle_dy, candle_y]])
     update_ignition_values()
@@ -68,13 +76,13 @@ def color_linear(temp):
 def update(content):
     global heat_mat
     # sparking flame:
-    if np.random.rand() < 0.8:
+    if np.random.rand() < random_fac:
         update_ignition_values()
     heat_mat[ignition_area[0][0]: ignition_area[0][1], ignition_area[1][0]: ignition_area[1][1]] = ignition_values
     # diffusion
     heat_mat = heat_mat + convolve(heat_mat, con_mat)
     # cooling
-    heat_mat -= 0.5
+    heat_mat -= cooldown
     heat_mat = np.clip(heat_mat, 0, 1000000)
     for i in range(content.shape[0]):
         for j in range(content.shape[1]):
