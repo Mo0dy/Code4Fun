@@ -7,11 +7,11 @@ import Code4Fun.Projects.MatrixAnimations.Rain as Rain
 import Code4Fun.Projects.MatrixAnimations.BouncingParticles as bPart
 
 mat_shape = np.array([8, 8, 3])
-margins = 5
+margins = 1
 resolution = 1
 content = np.zeros(mat_shape)
 
-bPart.init(mat_shape, 1)
+gFlame.init(mat_shape, 1)
 
 
 pg.init()
@@ -34,7 +34,7 @@ def clear():
 
 def update():
     global content
-    bPart.update(content)
+    gFlame.update(content)
 
 def draw():
     global content
