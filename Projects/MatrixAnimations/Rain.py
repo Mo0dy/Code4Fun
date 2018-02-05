@@ -4,7 +4,6 @@ import pygame as pg
 from scipy.ndimage.filters import convolve
 
 
-
 def init(mat_shape, density):
     global drops, start_height
     start_height = mat_shape[1] * -100
