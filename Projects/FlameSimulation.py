@@ -57,18 +57,12 @@ def render(screen_mat, mat):
             if mat[i, j] < 255:
                 screen_mat[i, j, 0] = mat[i, j]
                 screen_mat[i, j, 1] = 0
-                screen_mat[i, j, 2] = 0
-            elif mat[i, j] < 510:
+            else:
                 screen_mat[i, j, 0] = 255
                 screen_mat[i, j, 1] = mat[i, j] - 255
-                screen_mat[i, j, 2] = 0
 
                 if screen_mat[i, j, 1] > 255:
                     screen_mat[i, j, 1] = 255
-            else:
-                screen_mat[i, j, 0] = 255
-                screen_mat[i, j, 1] = 255
-                screen_mat[i, j, 2] = 0
 
 
 @nb.guvectorize([(nb.float64[:, :], nb.float64, nb.float64[:, :])], '(a,b),(),(c,d)', target='parallel', cache=True)
@@ -93,7 +87,6 @@ def update():
     if np.random.rand() < random_fac:
         update_ignition_values()
     heat_mat[ignition_area[0][0]: ignition_area[0][1], ignition_area[1][0]: ignition_area[1][1]] = ignition_values
-    # heat_mat[130: 170, 390: 400] = 0
     # diffusion
     fast_update(heat_mat, cooldown, con_mat)
 
@@ -104,7 +97,7 @@ def update():
 
 loop = True
 while loop:
-    clock.tick()
+    clock.tick(200)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False
