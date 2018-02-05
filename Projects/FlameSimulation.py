@@ -1,7 +1,6 @@
 from Code4Fun.Utility.Vec2 import *
 import numpy as np
 import pygame as pg
-from scipy.ndimage.filters import convolve
 import pygame.surfarray
 import scipy.ndimage
 import numba as nb
