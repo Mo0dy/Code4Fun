@@ -5,13 +5,13 @@ from scipy.ndimage.filters import convolve
 import Code4Fun.Projects.MatrixAnimations.GridFlame as gFlame
 import Code4Fun.Projects.MatrixAnimations.Rain as Rain
 import Code4Fun.Projects.MatrixAnimations.BouncingParticles as bPart
+import Code4Fun.Projects.MatrixAnimations.GameOfLife as gol
+import Code4Fun.Projects.MatrixAnimations.LangdonsAnt as ant
 
 mat_shape = np.array([8, 8, 3])
 margins = 1
 resolution = 1
 content = np.zeros(mat_shape)
-
-gFlame.init(mat_shape, 1)
 
 
 pg.init()
@@ -24,7 +24,7 @@ font = pg.font.SysFont("comicsansms", 50)
 
 
 def reset():
-    pass
+    ant.init(mat_shape)
 
 
 def clear():
@@ -34,7 +34,7 @@ def clear():
 
 def update():
     global content
-    gFlame.update(content)
+    ant.update(content)
 
 def draw():
     global content
@@ -54,7 +54,7 @@ keydown_func = {
 reset()
 loop = True
 while loop:
-    clock.tick(15)
+    clock.tick(5)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False

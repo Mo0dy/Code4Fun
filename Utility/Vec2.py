@@ -63,7 +63,7 @@ class Vec2(object):
         return str(self.vec)
 
     def __eq__(self, other):
-        return self.vec == other.vec
+        return np.all(self.vec == other.vec)
 
     @property
     def x(self):

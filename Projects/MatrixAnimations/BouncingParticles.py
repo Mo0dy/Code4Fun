@@ -39,3 +39,12 @@ def update(content):
         p.update()
         content[p.pos.x, p.pos.y] = np.array([255, 255, 255], dtype=np.uint8)
 
+    for i in range(len(particles)):
+        p1 = particles[i]
+        for j in range(i + 1, len(particles)):
+            p2 = particles[j]
+            if p1.pos == p2.pos:
+                vel = p1.vel
+                p1.vel = p2.vel
+                p2.vel = vel
+
