@@ -6,7 +6,7 @@ import random
 
 
 def random_sign():
-    return int(random.random() * 3 - 2)
+    return int(random.random() * 2) * 2 - 1
 
 
 class Particle(object):
@@ -18,27 +18,24 @@ class Particle(object):
         self.min_y = min_y
         self.max_y = max_y
 
+    def update(self):
+        new_pos = self.pos + self.vel
 
-def init(matrix, amount):
+        if self.min_x > new_pos.x or new_pos.x > self.max_x:
+            self.vel.x *= -1
+        if self.min_y > new_pos.y or new_pos.y > self.max_y:
+            self.vel.y *= -1
+        self.pos += self.vel
+
+
+def init(mat_shape, amount):
     global particles
-    particles = [Particle[0, matrix.shape[0] - 1, 0, matrix.shape[1] - 1] for _ in range(amount)]
+    particles = [Particle(0, mat_shape[0] - 1, 0, mat_shape[1] - 1) for _ in range(amount)]
 
 
 def update(content):
     content[:, :, :] = 0
     for p in particles:
         p.update()
-
-    for d in drops:
-        d[1] += 1
-        if d[1] >= content.shape[1]:
-            d[1] = start_height
-
-    for d in drops:
-        if d[1] >= 0:
-            content[d[0], d[1]] = np.array([0, 71, 186])
-        if 0 <= d[1] + 1 < content.shape[1]:
-            content[d[0], d[1] + 1] = np.array([0, 71, 186])
-    pass
-
+        content[p.pos.x, p.pos.y] = np.array([255, 255, 255], dtype=np.uint8)
 

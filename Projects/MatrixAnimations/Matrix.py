@@ -4,13 +4,14 @@ import pygame as pg
 from scipy.ndimage.filters import convolve
 import Code4Fun.Projects.MatrixAnimations.GridFlame as gFlame
 import Code4Fun.Projects.MatrixAnimations.Rain as Rain
+import Code4Fun.Projects.MatrixAnimations.BouncingParticles as bPart
 
 mat_shape = np.array([8, 8, 3])
 margins = 5
 resolution = 1
 content = np.zeros(mat_shape)
 
-Rain.init(mat_shape, 10)
+bPart.init(mat_shape, 1)
 
 
 pg.init()
@@ -33,7 +34,7 @@ def clear():
 
 def update():
     global content
-    Rain.update(content)
+    bPart.update(content)
 
 def draw():
     global content
@@ -53,7 +54,7 @@ keydown_func = {
 reset()
 loop = True
 while loop:
-    clock.tick(20)
+    clock.tick(15)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False
