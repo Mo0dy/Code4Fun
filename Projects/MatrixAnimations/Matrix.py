@@ -8,14 +8,14 @@ import Code4Fun.Projects.MatrixAnimations.BouncingParticles as bPart
 import Code4Fun.Projects.MatrixAnimations.GameOfLife as gol
 import Code4Fun.Projects.MatrixAnimations.LangdonsAnt as ant
 
-mat_shape = np.array([8, 8, 3])
+mat_shape = np.array([15, 15, 3])
 margins = 1
 resolution = 1
 content = np.zeros(mat_shape)
 
 
 pg.init()
-window_size = mat_shape[0] * 100, mat_shape[1] * 100
+window_size = mat_shape[0] * 50, mat_shape[1] * 50
 origin = Vec2(np.array(window_size)) / 2
 screen = pg.display.set_mode(window_size)
 pg.display.set_caption("Matrix Animations")
@@ -24,7 +24,7 @@ font = pg.font.SysFont("comicsansms", 50)
 
 
 def reset():
-    ant.init(mat_shape)
+    gol.init(mat_shape)
 
 
 def clear():
@@ -34,7 +34,7 @@ def clear():
 
 def update():
     global content
-    ant.update(content)
+    gol.update(content)
 
 def draw():
     global content
@@ -54,7 +54,7 @@ keydown_func = {
 reset()
 loop = True
 while loop:
-    clock.tick(5)
+    clock.tick(15)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False
