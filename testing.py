@@ -1,32 +1,31 @@
-from MyMaths.Vec2 import *
+from Code4Fun.Utility.Vec2 import *
 import numpy as np
 import pygame as pg
 
+background_color = 50, 50, 50
+window_size = 800, 800
+
+
 
 pg.init()
-window_size = 800, 800
 origin = Vec2(np.array(window_size)) / 2
 screen = pg.display.set_mode(window_size)
 pg.display.set_caption("test")
 clock = pg.time.Clock()
-font = pg.font.SysFont("comicsansms", 50)
+font = pg.font.SysFont("comicsansms", 20)
 
 
 def reset():
-    global vector
-    vector = Vec2(100, 0)
+    pass
 
 
-def update(dt):
-    global vector
-    m_pos = Vec2(pg.mouse.get_pos())
-    vector = m_pos - origin
+def update():
+    pass
 
 
 def draw():
-    text = font.render(str(np.degrees(vector.theta)), True, (255, 255, 255))
-    screen.blit(text, (50, 50))
-    pg.draw.line(screen, (255, 255, 255), origin.tuple_int, (origin + vector).tuple_int)
+    text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
+    screen.blit(text, (10, 10))
 
 
 keydown_func = {
@@ -44,8 +43,8 @@ while loop:
         elif e.type == pg.KEYDOWN:
             keydown_func[e.key]()
 
-    update(clock.get_time())
-    screen.fill((50, 50, 50))
+    update()
+    screen.fill(background_color)
     draw()
     pg.display.flip()
 pg.quit()
