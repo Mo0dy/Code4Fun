@@ -42,6 +42,17 @@ def render_points_multicolor(points, color, output):
             output[i1, i2, 2] = color[i, 2]
 
 
+# renders a certain color if a boolean array is true
+@nb.guvectorize([(nb.uint8[:, :], nb.uint8[:], nb.uint8[:, :, :])], '(a,b),(c),(a,b,c)', target='parallel', cache=True)
+def render_bool_arr(bool_arr, color, target):
+    for i in range(bool_arr.shape[0]):
+        for j in range(bool_arr.shape[1]):
+            if bool_arr[i, j]:
+                target[i, j, 0] = color[0]
+                target[i, j, 1] = color[1]
+                target[i, j, 2] = color[2]
+
+
 @nb.guvectorize([(nb.uint8[:, :, :], nb.uint8[:])], '(a,b,c),(c)', target='parallel', cache=True)
 def fill(input, color):
     for i in range(input.shape[0]):
