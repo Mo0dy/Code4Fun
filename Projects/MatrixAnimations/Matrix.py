@@ -9,7 +9,7 @@ import Code4Fun.Projects.MatrixAnimations.GameOfLife as gol
 import Code4Fun.Projects.MatrixAnimations.LangdonsAnt as ant
 import Code4Fun.Projects.MatrixAnimations.ParticleEffects as pEffect
 
-mat_shape = np.array([15, 15, 3])
+mat_shape = np.array([8, 8, 3])
 margins = 1
 resolution = 1
 content = np.zeros(mat_shape)

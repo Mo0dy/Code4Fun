@@ -18,9 +18,9 @@ class Particle(object):
     def __init__(self, pos):
         self.pos = pos
         self.vel = Vec2()
-        self.vel.y = np.random.rand() * -5 - 5
-        self.vel.x = np.random.rand() * 3 - 1.5
-        self.total_lifetime = np.random.rand() * 3 + 3
+        self.vel.y = np.random.rand() * -1 - 2
+        self.vel.x = np.random.rand() * 0.5 + 1
+        self.total_lifetime = np.random.rand() * 4 + 2
         self.lifetime = 0
         self.delta_temp = 255
         self.temp = self.delta_temp
@@ -28,7 +28,7 @@ class Particle(object):
     def update(self, dt):
         self.lifetime += dt
         self.pos += self.vel * dt
-        self.vel.y += 4 * dt
+        self.vel.y += 0.7 * dt
         self.update_temp()
         return self.lifetime > self.total_lifetime
 
@@ -47,7 +47,7 @@ def init(mat_shape):
 
 def update(content):
     while len(particles) < particle_amount:
-        particles.append(Particle(Vec2(origin.x, m_shape[1])))
+        particles.append(Particle(Vec2(0, m_shape[1])))
 
     content[:, :, :] = 0
     i = 0
