@@ -7,6 +7,7 @@ import Code4Fun.Projects.MatrixAnimations.Rain as Rain
 import Code4Fun.Projects.MatrixAnimations.BouncingParticles as bPart
 import Code4Fun.Projects.MatrixAnimations.GameOfLife as gol
 import Code4Fun.Projects.MatrixAnimations.LangdonsAnt as ant
+import Code4Fun.Projects.MatrixAnimations.ParticleEffects as pEffect
 
 mat_shape = np.array([15, 15, 3])
 margins = 1
@@ -24,7 +25,7 @@ font = pg.font.SysFont("comicsansms", 50)
 
 
 def reset():
-    gol.init(mat_shape)
+    pEffect.init(mat_shape)
 
 
 def clear():
@@ -34,7 +35,7 @@ def clear():
 
 def update():
     global content
-    gol.update(content)
+    pEffect.update(content)
 
 def draw():
     global content
