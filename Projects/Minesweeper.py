@@ -40,12 +40,14 @@ for i in range(content_shape[0]):
 
 
 # variables
+total_tiles = content_shape[0] * content_shape[1]
 distances = np.zeros(content_shape)
 mines = np.zeros(content_shape)
 # the information the player currently has
 info = np.ones(content_shape) * -1
 display_mines = False
-
+chosen_fileds = 0
+mines_amount = 0
 
 def under_mouse():
     mouse_pos = Vec2(pg.mouse.get_pos()[0], pg.mouse.get_pos()[1])
@@ -57,12 +59,15 @@ def under_mouse():
 
 
 def choice(x, y):
+    global chosen_fileds
     if distances[x, y]:
         info[x, y] = distances[x, y]
+        chosen_fileds += 1
     else:
         depth_f = depth_first(x, y)
         for i in depth_f:
             info[i[0], i[1]] = distances[i[0], i[1]]
+        chosen_fileds += len(depth_f)
 
 
 def calc_dist():
@@ -76,13 +81,16 @@ def fill_mines(density):
 
 
 def reset():
-    global info
+    global info, chosen_fileds, mines_amount
     fill_mines(mines_density)
     calc_dist()
     info = np.ones(content_shape) * -1
+    chosen_fileds = 0
+    mines_amount = mines[mines.astype(bool)].shape[0]
 
 
 def game_over():
+    print("game over")
     reset()
 
 
@@ -95,13 +103,16 @@ def on_click():
 
 
 def update():
-    pass
+    if chosen_fileds > total_tiles - mines_amount:
+        print("won")
+        reset()
 
 
 def depth_first(x, y):
     result = [[x, y]]
     path = [[x, y]]
     possible = distances == 0
+    already_searched = np.zeros(possible.shape, dtype=np.bool)
 
     while len(path) > 0:
         for i in range(3):
@@ -109,10 +120,12 @@ def depth_first(x, y):
                 look_x = path[0][0] + i - 1
                 look_y = path[0][1] + j - 1
                 if 0 <= look_x < possible.shape[0] and 0 <= look_y < possible.shape[1]:
-                    result.append([look_x, look_y])
-                    if possible[look_x, look_y]:
-                        path.append([look_x, look_y])
-                        possible[look_x, look_y] = False
+                    if not already_searched[look_x, look_y]:
+                        result.append([look_x, look_y])
+                        already_searched[look_x, look_y] = True
+                        if possible[look_x, look_y]:
+                            path.append([look_x, look_y])
+                            possible[look_x, look_y] = False
         del path[0]
     return result
 
@@ -149,8 +162,6 @@ def draw():
                 if mines[i, j]:
                     pg.draw.circle(screen, (255, 0, 0), (i * scale + int(scale / 2), j * scale + int(scale / 2)), 4)
 
-    text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
-    screen.blit(text, (10, 10))
 
 
 def toggle_mines():
