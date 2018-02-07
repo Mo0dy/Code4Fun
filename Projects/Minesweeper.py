@@ -56,7 +56,12 @@ def under_mouse():
 
 
 def choice(x, y):
-    info[x, y] = distances[x, y]
+    if distances[x, y]:
+        info[x, y] = distances[x, y]
+    else:
+        depth_f = depth_first(x, y)
+        for i in depth_f:
+            info[i[0], i[1]] = distances[i[0], i[1]]
 
 
 def calc_dist():
@@ -87,8 +92,28 @@ def on_click():
     else:
         choice(m_pos[0], m_pos[1])
 
+
 def update():
     pass
+
+
+def depth_first(x, y):
+    result = [[x, y]]
+    path = [[x, y]]
+    possible = distances == 0
+
+    while len(path) > 0:
+        for i in range(3):
+            for j in range(3):
+                look_x = path[0][0] + i - 1
+                look_y = path[0][1] + j - 1
+                if 0 <= look_x < possible.shape[0] and 0 <= look_y < possible.shape[1]:
+                    result.append([look_x, look_y])
+                    if possible[look_x, look_y]:
+                        path.append([look_x, look_y])
+                        possible[look_x, look_y] = False
+        del path[0]
+    return result
 
 
 def draw():
@@ -116,13 +141,11 @@ def draw():
             elif dist == 0:
                 screen.blit(pressed_tile, (i * scale, j * scale))
 
-
-    # draw mines in red
-    for i in range(mines.shape[0]):
-        for j in range(mines.shape[1]):
-            if mines[i, j]:
-                pg.draw.circle(screen, (255, 0, 0), (i * scale + int(scale / 2), j * scale + int(scale / 2)), 4)
-
+    # # draw mines in red
+    # for i in range(mines.shape[0]):
+    #     for j in range(mines.shape[1]):
+    #         if mines[i, j]:
+    #             pg.draw.circle(screen, (255, 0, 0), (i * scale + int(scale / 2), j * scale + int(scale / 2)), 4)
 
     text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
     screen.blit(text, (10, 10))
