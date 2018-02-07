@@ -27,8 +27,13 @@ font = pg.font.SysFont("comicsansms", 20)
 d_font = pg.font.SysFont("arialblack", 12)
 tile = pg.image.load(r"Assets\Minesweeper\tile.png")
 tile = pg.transform.scale(tile, (scale, scale))
+pressed_tile = pg.Surface((scale, scale))
+pressed_tile.fill((50, 50, 50))
+pg.draw.rect(pressed_tile, (100, 100, 100), (1, 1, scale - 2, scale - 2))
+
 
 background = pg.Surface(window_size)
+
 for i in range(content_shape[0]):
     for j in range(content_shape[1]):
         background.blit(tile, (i * scale, j * scale))
@@ -37,6 +42,21 @@ for i in range(content_shape[0]):
 # variables
 distances = np.zeros(content_shape)
 mines = np.zeros(content_shape)
+# the information the player currently has
+info = np.ones(content_shape) * -1
+
+
+def under_mouse():
+    mouse_pos = Vec2(pg.mouse.get_pos()[0], pg.mouse.get_pos()[1])
+    # normalize mouse pos
+    # scale mouse pos to array size:
+    mouse_pos.x = int(mouse_pos.x / window_size[0] * content_shape[0])
+    mouse_pos.y = int(mouse_pos.y / window_size[1] * content_shape[1])
+    return mouse_pos
+
+
+def choice(x, y):
+    info[x, y] = distances[x, y]
 
 
 def calc_dist():
@@ -50,9 +70,22 @@ def fill_mines(density):
 
 
 def reset():
+    global info
     fill_mines(mines_density)
     calc_dist()
+    info = np.ones(content_shape) * -1
 
+
+def game_over():
+    reset()
+
+
+def on_click():
+    m_pos = under_mouse()
+    if mines[m_pos[0], m_pos[1]]:
+        game_over()
+    else:
+        choice(m_pos[0], m_pos[1])
 
 def update():
     pass
@@ -64,20 +97,24 @@ def draw():
 
     # render the distances
     offset = int(scale / 2 - 3)
-    for i in range(distances.shape[0]):
-        for j in range(distances.shape[1]):
-            dist = distances[i, j]
-            if dist < 1:
-                color = (50, 50, 50)
-            elif dist < 3:
-                color = (50, 50, 200)
-            elif dist < 5:
-                color = (220, 100, 50)
-            else:
-                color = (250, 50, 50)
+    for i in range(info.shape[0]):
+        for j in range(info.shape[1]):
+            dist = info[i, j]
+            if dist > 0:
+                if dist < 1:
+                    color = (50, 50, 50)
+                elif dist < 3:
+                    color = (50, 50, 200)
+                elif dist < 5:
+                    color = (220, 100, 50)
+                else:
+                    color = (250, 50, 50)
 
-            d = d_font.render(str(dist), True, color)
-            screen.blit(d, (i * scale + offset, j * scale))
+                d = d_font.render("%d" % dist, True, color)
+                screen.blit(d, (i * scale + offset, j * scale))
+
+            elif dist == 0:
+                screen.blit(pressed_tile, (i * scale, j * scale))
 
 
     # draw mines in red
@@ -105,6 +142,8 @@ while loop:
             loop = False
         elif e.type == pg.KEYDOWN:
             keydown_func[e.key]()
+        elif e.type == pg.MOUSEBUTTONDOWN:
+            on_click()
 
     update()
     draw()
