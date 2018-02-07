@@ -44,6 +44,7 @@ distances = np.zeros(content_shape)
 mines = np.zeros(content_shape)
 # the information the player currently has
 info = np.ones(content_shape) * -1
+display_mines = False
 
 
 def under_mouse():
@@ -66,7 +67,7 @@ def choice(x, y):
 
 def calc_dist():
     global distances
-    distances = convolve(mines, con_mat).astype(np.uint8)
+    distances = convolve(mines, con_mat, mode='constant', cval=0).astype(np.uint8)
 
 
 def fill_mines(density):
@@ -141,25 +142,32 @@ def draw():
             elif dist == 0:
                 screen.blit(pressed_tile, (i * scale, j * scale))
 
-    # # draw mines in red
-    # for i in range(mines.shape[0]):
-    #     for j in range(mines.shape[1]):
-    #         if mines[i, j]:
-    #             pg.draw.circle(screen, (255, 0, 0), (i * scale + int(scale / 2), j * scale + int(scale / 2)), 4)
+    if display_mines:
+        # draw mines in red
+        for i in range(mines.shape[0]):
+            for j in range(mines.shape[1]):
+                if mines[i, j]:
+                    pg.draw.circle(screen, (255, 0, 0), (i * scale + int(scale / 2), j * scale + int(scale / 2)), 4)
 
     text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
     screen.blit(text, (10, 10))
 
 
+def toggle_mines():
+    global display_mines
+    display_mines = not display_mines
+
+
 keydown_func = {
-    pg.K_r: reset
+    pg.K_r: reset,
+    pg.K_m: toggle_mines,
 }
 
 
 reset()
 loop = True
 while loop:
-    clock.tick()
+    clock.tick(30)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False
