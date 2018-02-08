@@ -14,6 +14,7 @@ allowed_settings = {
     'random_magnitude',     # the strength of the random motion
     'p_force',              # linear forces to a point
     'p_force_mag',          # mag of the linear forces
+    'p_force_degree'
     'init_distrib',          # the initial distribution over the bounds
     'oob_force',            # oob forces
     'oob_force_mag',
@@ -21,7 +22,7 @@ allowed_settings = {
     'color',                 # single color value
     'goal_forces',
     'goal_forces_mag',
-    'goal_forces_disburse'
+    'goal_forces_disburse',
 }
 
 
@@ -33,6 +34,7 @@ class ParticleSim(object):
     random_magnitude = 10
     p_force = False
     p_force_mag = 50
+    p_force_degree = 1
     oob_force = False
     oob_force_mag = 500
     init_distrib = 'ran_distrib'
@@ -75,7 +77,10 @@ class ParticleSim(object):
         if self.random_motion:
             ParticleSim.apply_random_forces(self.forces, self.random_magnitude)
         if self.p_force:
-            ParticleSim.apply_const_point_force(self.particles, self.forces, self.force_point, self.p_force_mag)
+            if self.p_force_degree == 1:
+                ParticleSim.apply_const_point_force(self.particles, self.forces, self.force_point, self.p_force_mag)
+            else:
+                ParticleSim.apply_poly_point_force(self.particles, self.forces, self.force_point, self.p_force_mag, self.p_force_degree)
         if self.oob_force:
             ParticleSim.apply_oob_force(self.particles, self.forces, self.x_bounds, self.y_bounds, self.oob_force_mag)
         if self.goal_forces:
@@ -107,12 +112,12 @@ class ParticleSim(object):
             d_x = goals[i, 0] - p[i, 0]
             d_y = goals[i, 1] - p[i, 1]
 
-            dist = np.sqrt(d_x ** 2 + d_y ** 2)
-            if dist:
+            dist_squared = d_x ** 2 + d_y ** 2
+            if dist_squared:
                 if pursue_goals[i]:
-                    scale = mag / dist
+                    scale = mag / np.sqrt(dist_squared)
                 else:
-                    scale = -disburse_mag / dist
+                    scale = -disburse_mag / dist_squared
 
                 f[i, 0] += d_x * scale
                 f[i, 1] += d_y * scale
@@ -145,6 +150,23 @@ class ParticleSim(object):
             d_y = point[1] - p[i, 1]
 
             dist = np.sqrt(d_x ** 2 + d_y ** 2)
+
+            # normalizes and then scales the force vector
+            d_x *= mag / dist
+            d_y *= mag / dist
+
+            f[i, 0] += d_x
+            f[i, 1] += d_y
+
+    # this only works for poly_degree >= 1
+    @staticmethod
+    @nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float64[:], nb.float64, nb.int64)], '(a,b),(a,b),(b),(),()', target='parallel', cache=True)
+    def apply_poly_point_force(p, f, point, mag, poly_degree):
+        for i in nb.prange(p.shape[0]):
+            d_x = point[0] - p[i, 0]
+            d_y = point[1] - p[i, 1]
+
+            dist = (d_x ** 2 + d_y ** 2) ** poly_degree
 
             # normalizes and then scales the force vector
             d_x *= mag / dist

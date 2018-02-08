@@ -25,12 +25,14 @@ pSim = ParticleSim((0, window_size[0]), (0, window_size[1]), 1e5,
                    random_motion=True,
                    p_force=False,
                    p_force_mag=500,
+                   p_force_degree=2,
                    grav_const=1e3,
                    random_magnitude=10,
                    oob_force=True,
                    color=rnd.color([200, 200, 100]),
                    goal_forces=True,
-                   goal_forces_mag=1e4
+                   goal_forces_mag=1e4,
+                   goal_forces_disburse=5e3,
                    )
 
 pSim.ran_color_distrib()
