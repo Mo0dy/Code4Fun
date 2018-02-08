@@ -65,6 +65,9 @@ class Vec2(object):
     def __eq__(self, other):
         return np.all(self.vec == other.vec)
 
+    def __repr__(self):
+        return "<Vec2: [%f | %f]>" % (self.x, self.y)
+
     @property
     def x(self):
         return self[0]

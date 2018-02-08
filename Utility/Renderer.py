@@ -2,6 +2,13 @@ import numba as nb
 import numpy as np
 
 
+def color(*args):
+    if len(args) == 1:
+        return np.array(args[0], dtype=np.uint8)
+    else:
+        return np.array(args, dtype=np.uint8)
+
+
 @nb.guvectorize([(nb.float64[:, :], nb.float64, nb.float64, nb.float64, nb.float64, nb.float64[:, :])], '(a,b),(),(),(),()->(a,b)', target='parallel', cache=True)
 def clip(p, x_min, x_max, y_min, y_max, output):
     for i in range(p.shape[0]):
