@@ -94,7 +94,6 @@ def update():
         render(pg.surfarray.pixels3d(screen), heat_mat)
     iterator += 1
 
-
 loop = True
 while loop:
     clock.tick(200)
