@@ -18,7 +18,10 @@ allowed_settings = {
     'oob_force',            # oob forces
     'oob_force_mag',
     'multicolor',           # toggles multicolor support
-    'color'                 # single color value
+    'color',                 # single color value
+    'goal_forces',
+    'goal_forces_mag',
+    'goal_forces_disburse'
 }
 
 
@@ -29,14 +32,17 @@ class ParticleSim(object):
     random_motion = False
     random_magnitude = 10
     p_force = False
-    p_force_mag = 10
+    p_force_mag = 50
     oob_force = False
-    oob_force_mag = 100
+    oob_force_mag = 500
     init_distrib = 'ran_distrib'
     multicolor = False
     color = rnd.color([255, 255, 255])
     goal_forces = False
-    goal_forces_mag = 10
+    goal_forces_mag = 500
+    goal_forces_disburse = 10
+    damping = True
+    damping_mag = 0.01
 
     def __init__(self, x_bounds=(0, 800), y_bounds=(0, 800), particle_amount=1e5, **kwargs):
         # assigns kwargs to member variables if allowed
@@ -56,11 +62,9 @@ class ParticleSim(object):
         self.velocities = np.zeros((self.particle_amount, 2))
         self.forces = np.zeros((self.particle_amount, 2))
 
-        if self.multicolor:
-            self.colors = np.ones((self.particle_amount, 3), dtype=np.uint8) * 100
-
-        if self.goal_forces:
-            self.goals = np.zeros((self.particle_amount, 2))
+        self.colors = np.ones((self.particle_amount, 3), dtype=np.uint8) * 100
+        self.goals = np.zeros((self.particle_amount, 2), dtype=np.float64)
+        self.pursue_goals = np.zeros(self.particle_amount, dtype=np.bool)
 
     # calls all the different functions necessary to update the particles
     def update(self, dt):
@@ -74,23 +78,44 @@ class ParticleSim(object):
             ParticleSim.apply_const_point_force(self.particles, self.forces, self.force_point, self.p_force_mag)
         if self.oob_force:
             ParticleSim.apply_oob_force(self.particles, self.forces, self.x_bounds, self.y_bounds, self.oob_force_mag)
+        if self.goal_forces:
+            ParticleSim.apply_const_goal_force(self.particles, self.forces, self.goals, self.pursue_goals, self.goal_forces_mag, self.goal_forces_disburse)
+        if self.damping:
+            ParticleSim.apply_damping_force(self.velocities, self.forces, self.damping_mag)
         ParticleSim.move_particles(self.particles, self.velocities, self.forces, dt)
 
     @staticmethod
-    @nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float64[:, :], nb.float64)], '(a,b),(a,b),(a,b),()', target='parallel', cache=True)
-    def apply_const_goal_force(p, f, goals, mag):
+    @nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float64)], '(a,b),(a,b),()', target='parallel', cache=True)
+    def apply_damping_force(vel, f, mag):
+        for i in nb.prange(vel.shape[0]):
+            v_x = vel[i, 0]
+            v_y = vel[i, 1]
+
+            vel_mag = np.sqrt(v_x ** 2 + v_y ** 2)
+
+            # if vel_mag:
+            scale = mag * vel_mag
+
+            # this can reverse the direction. Not accurate!
+            f[i, 0] -= v_x * scale
+            f[i, 1] -= v_y * scale
+
+    @staticmethod
+    @nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float64[:, :],  nb.float64[:], nb.float64, nb.float64)], '(a,b),(a,b),(a,b),(a),(),()', target='parallel', cache=True)
+    def apply_const_goal_force(p, f, goals, pursue_goals, mag, disburse_mag):
         for i in nb.prange(p.shape[0]):
             d_x = goals[i, 0] - p[i, 0]
             d_y = goals[i, 1] - p[i, 1]
 
             dist = np.sqrt(d_x ** 2 + d_y ** 2)
+            if dist:
+                if pursue_goals[i]:
+                    scale = mag / dist
+                else:
+                    scale = -disburse_mag / dist
 
-            # normalizes and then scales the force vector
-            d_x *= mag / dist
-            d_y *= mag / dist
-
-            f[i, 0] += d_x
-            f[i, 1] += d_y
+                f[i, 0] += d_x * scale
+                f[i, 1] += d_y * scale
 
     @staticmethod
     @nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float64[:], nb.float64[:], nb.float64)], '(a,b),(a,b),(b),(b),()', target='parallel', cache=True)
@@ -182,29 +207,19 @@ class ParticleSim(object):
         return np.array([self.bounds_min.y, self.bounds_max.y])
 
 
-def find_goal_forces(input_arr, goal_points):
+@nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.boolean[:], nb.float64, nb.float64)], '(a,b),(d,e),(d),(),()', target='parallel', cache=False)
+def assign_goals(input_arr, goal_points, pursue_goal, offset_x, offset_y):
     index = 0
+    for i in nb.prange(pursue_goal.shape[0]):
+        pursue_goal[i] = False
+
     for i in range(input_arr.shape[0]):
         for j in range(input_arr.shape[1]):
-            if index >= goal_points.shape[0]:
-                sys.stdout.error.write("index oob: goal array")
-                sys.stdout.error.flush()
             if input_arr[i, j]:
-                goal_points[index, 0] = i
-                goal_points[index, 1] = j
+                goal_points[index, 0] = i + offset_x
+                goal_points[index, 1] = j + offset_y
+                pursue_goal[index] = True
                 index += 1
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
