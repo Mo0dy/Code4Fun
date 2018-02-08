@@ -4,6 +4,7 @@ import pygame as pg
 import numba as nb
 import Code4Fun.Utility.TimeTest as Test
 import Code4Fun.Utility.Renderer as rnd
+tt = Test.Tester("gen test")
 
 mat_shape = 800, 800
 
@@ -14,6 +15,7 @@ glider = np.array([[0, 1, 0],
 mats = [np.zeros(mat_shape, dtype=np.uint8), np.zeros(mat_shape, dtype=np.uint8)]
 
 curr_mat = 0
+
 
 def init():
     global mat
@@ -84,11 +86,10 @@ keydown_func = {
     pg.K_r: reset
 }
 
-
 reset()
 loop = True
 while loop:
-    clock.tick(60)
+    clock.tick()
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False
