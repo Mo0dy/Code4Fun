@@ -23,6 +23,7 @@ allowed_settings = {
     'goal_forces',
     'goal_forces_mag',
     'goal_forces_disburse',
+    'goal_forces_degree',
 }
 
 
@@ -30,21 +31,22 @@ allowed_settings = {
 class ParticleSim(object):
     gravity = False
     grav_const = 9.81
-    random_motion = False
-    random_magnitude = 10
+    random_motion = True
+    random_magnitude = 1
     p_force = False
-    p_force_mag = 50
-    p_force_degree = 1
+    p_force_mag = 2e3
+    p_force_degree = 0
     oob_force = False
-    oob_force_mag = 500
+    oob_force_mag = 1e4
     init_distrib = 'ran_distrib'
     multicolor = False
     color = rnd.color([255, 255, 255])
     goal_forces = False
-    goal_forces_mag = 500
-    goal_forces_disburse = 10
+    goal_forces_mag = 1e4
+    goal_forces_disburse = 1e3
+    goal_forces_degree = 0
     damping = True
-    damping_mag = 0.01
+    damping_mag = 0.1
 
     def __init__(self, x_bounds=(0, 800), y_bounds=(0, 800), particle_amount=1e5, **kwargs):
         # assigns kwargs to member variables if allowed
@@ -77,14 +79,18 @@ class ParticleSim(object):
         if self.random_motion:
             ParticleSim.apply_random_forces(self.forces, self.random_magnitude)
         if self.p_force:
-            if self.p_force_degree == 1:
+            if self.p_force_degree == 0:
                 ParticleSim.apply_const_point_force(self.particles, self.forces, self.force_point, self.p_force_mag)
             else:
                 ParticleSim.apply_poly_point_force(self.particles, self.forces, self.force_point, self.p_force_mag, self.p_force_degree)
         if self.oob_force:
             ParticleSim.apply_oob_force(self.particles, self.forces, self.x_bounds, self.y_bounds, self.oob_force_mag)
         if self.goal_forces:
-            ParticleSim.apply_const_goal_force(self.particles, self.forces, self.goals, self.pursue_goals, self.goal_forces_mag, self.goal_forces_disburse)
+            if self.goal_forces_degree == 0:
+                ParticleSim.apply_const_goal_force(self.particles, self.forces, self.goals, self.pursue_goals, self.goal_forces_mag, self.goal_forces_disburse)
+            else:
+                ParticleSim.apply_poly_goal_force(self.particles, self.forces, self.goals, self.pursue_goals, self.goal_forces_mag, self.goal_forces_disburse, self.goal_forces_degree)
+
         if self.damping:
             ParticleSim.apply_damping_force(self.velocities, self.forces, self.damping_mag)
         ParticleSim.move_particles(self.particles, self.velocities, self.forces, dt)
@@ -116,6 +122,24 @@ class ParticleSim(object):
             if dist_squared:
                 if pursue_goals[i]:
                     scale = mag / np.sqrt(dist_squared)
+                else:
+                    scale = -disburse_mag / dist_squared
+
+                f[i, 0] += d_x * scale
+                f[i, 1] += d_y * scale
+
+    @staticmethod
+    @nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float64[:, :], nb.float64[:], nb.float64, nb.float64, nb.float64)],
+                    '(a,b),(a,b),(a,b),(a),(),(),()', target='parallel', cache=True)
+    def apply_poly_goal_force(p, f, goals, pursue_goals, mag, disburse_mag, poly_degree):
+        for i in nb.prange(p.shape[0]):
+            d_x = goals[i, 0] - p[i, 0]
+            d_y = goals[i, 1] - p[i, 1]
+
+            dist_squared = d_x ** 2 + d_y ** 2
+            if dist_squared:
+                if pursue_goals[i]:
+                    scale = mag * np.sqrt(dist_squared) ** (poly_degree - 1)
                 else:
                     scale = -disburse_mag / dist_squared
 

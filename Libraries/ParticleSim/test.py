@@ -2,6 +2,7 @@ import numpy as np
 import pygame as pg
 from Code4Fun.Libraries.ParticleSim.ParticleSim import *
 import Code4Fun.Utility.Renderer as rnd
+from Code4Fun.Utility.Transform import *
 import time
 
 
@@ -13,6 +14,7 @@ pg.display.set_caption("testing particle sim")
 font = pg.font.SysFont("comicsansms", 12)
 big_font = pg.font.SysFont("comicsansms", 70)
 clock = pg.time.Clock()
+t = Transformation()
 
 
 def mouse_point():
@@ -20,30 +22,32 @@ def mouse_point():
 
 
 # create a new particle sim
-pSim = ParticleSim((0, window_size[0]), (0, window_size[1]), 1e5,
-                   gravity=False,
-                   random_motion=True,
-                   p_force=False,
-                   p_force_mag=500,
-                   p_force_degree=2,
-                   grav_const=1e3,
-                   random_magnitude=10,
-                   oob_force=True,
-                   color=rnd.color([200, 200, 100]),
+pSim = ParticleSim((0, window_size[0]), (0, window_size[1]), 2e4,
+                   color=rnd.color(153, 40, 0),
                    goal_forces=True,
-                   goal_forces_mag=1e4,
-                   goal_forces_disburse=5e3,
+                   oob_force=True
                    )
 
 pSim.ran_color_distrib()
 
 
-goal_surf = pg.Surface((500, 150))
-goal_surf.blit(big_font.render("coding is fun", True, (1, 0, 0)), (10, 10))
+goal_surf = pg.Surface((300, 300))
+# goal_surf.blit(big_font.render("coding is fun", True, (1, 0, 0)), (10, 10))
 # pg.draw.line(goal_surf, 1, (0, 100), (100, 100), 20)
 # pg.draw.line(goal_surf, 1, (0, 100), (50, 0), 20)
 # pg.draw.line(goal_surf, 1, (100, 100), (50, 0), 20)
 
+
+triangle = np.array([[40, 260], [260, 260], [150, 40]])
+for i in range(triangle.shape[0] - 1):
+    pg.draw.line(goal_surf, (255, 0, 0), (int(triangle[i, 0]), int(triangle[i, 1])),
+                 (int(triangle[i + 1, 0]), int(triangle[i + 1, 1])), 20)
+pg.draw.line(goal_surf, (255, 0, 0), (int(triangle[0, 0]), int(triangle[0, 1])),
+             (int(triangle[-1, 0]), int(triangle[-1, 1])), 20)
+
+
+assign_goals(pg.surfarray.pixels2d(goal_surf), pSim.goals, pSim.pursue_goals, - 150, - 150)
+orig_goals = pSim.goals.copy()
 
 def draw():
     screen.fill((50, 50, 50))
@@ -54,9 +58,13 @@ def draw():
     pg.display.flip()
 
 def update():
-    # goal_surf.fill(0)
-    # pg.draw.circle(goal_surf, 1, (150, 150), int((np.sin(time.time() / 10) + 1) * 30 + 10))
-    assign_goals(pg.surfarray.pixels2d(goal_surf), pSim.goals, pSim.pursue_goals, pg.mouse.get_pos()[0] - 250, pg.mouse.get_pos()[1] - 75)
+    t.reset()
+    t.rotate(time.time())
+    t.trans(pg.mouse.get_pos()[0],  pg.mouse.get_pos()[1])
+
+    pSim.goals = t * orig_goals
+
+    # assign_goals(pg.surfarray.pixels2d(goal_surf), pSim.goals, pSim.pursue_goals, pg.mouse.get_pos()[0] - 150, pg.mouse.get_pos()[1] - 150)
     pSim.force_point = mouse_point()
     pSim.update(clock.get_time() / 1000)
 
