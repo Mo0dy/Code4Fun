@@ -9,7 +9,7 @@ y_margin = 100
 damping = 0.999
 floor_damping = 0.3
 gravity = 400
-floor_height = 750
+floor_height = 550
 con_amount = 400
 point_size = 5
 
@@ -23,7 +23,7 @@ line_color = (100, 100, 100)
 node_color = (0, 204, 6)
 background_color = (50, 50, 50)
 
-size = 1600, 800
+size = 1200, 600
 pg.init()
 screen = pg.display.set_mode(size)
 pg.display.set_caption("testing Verlet integration")
@@ -118,7 +118,7 @@ def update(dt):
     old_points[oob_left, 0] = points[oob_left, 0] + vel[oob_left, 0]
 
     # resolving constraints
-    for _ in range(2):
+    for _ in range(10):
         resolve_constraints(constraints, con_lengths, points)
 
 
