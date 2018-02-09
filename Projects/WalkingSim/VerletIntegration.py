@@ -8,12 +8,13 @@ points_amount = 10
 x_margin = 500
 y_margin = 200
 damping = 0.999
+floor_damping = 0.3
 gravity = 400
 floor_height = 750
 con_amount = 20
 
 line_color = (100, 100, 100)
-node_color = (200, 100, 100)
+node_color = (0, 204, 6)
 background_color = (50, 50, 50)
 
 size = 1600, 800
@@ -85,7 +86,8 @@ def update(dt):
     # resolve floor collision:
     floor_points = points[:, 1] > floor_height
     points[floor_points, 1] = floor_height
-    old_points[floor_points, 1] = points[floor_points, 1] + vel[floor_points, 1]
+    old_points[floor_points, 1] = points[floor_points, 1] + vel[floor_points, 1] * 0.9
+    points[floor_points, 0] -= vel[floor_points, 0] * floor_damping
 
     # resolve walls
     oob_right = points[:, 0] > size[0]
@@ -105,7 +107,7 @@ def draw():
     screen.fill(background_color)
 
     if mouse_pressed:
-        pg.draw.line(screen, (20, 20, 20), (int(points[0, 0]), int(points[0, 1])), pg.mouse.get_pos(), 3)
+        pg.draw.line(screen, (107, 109, 50), (int(points[0, 0]), int(points[0, 1])), pg.mouse.get_pos(), 3)
 
     for c in constraints:
         p1 = points[c[0]]
