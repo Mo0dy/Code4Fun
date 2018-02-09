@@ -35,7 +35,7 @@ window_size = 800, 250
 x_bounds_init = [-500, window_size[0] + 500]
 y_bounds_init = [-100, window_size[1] + 100]
 screen = pg.display.set_mode(window_size)  # , pg.NOFRAME)
-pg.display.set_icon(pg.image.load("Assets\\icon.png"))
+pg.display.set_icon(pg.image.load("..\\Assets\\icon.png"))
 pg.display.set_caption("Particle Clock")
 # background_color = 206, 195, 163
 # particle_color = np.array([206, 59, 22], dtype=int)

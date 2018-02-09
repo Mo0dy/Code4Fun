@@ -24,6 +24,8 @@ allowed_settings = {
     'goal_forces_mag',
     'goal_forces_disburse',
     'goal_forces_degree',
+    'damping',
+    'damping_mag',
 }
 
 
@@ -33,20 +35,22 @@ class ParticleSim(object):
     grav_const = 9.81
     random_motion = True
     random_magnitude = 1
+    # force to a point
     p_force = False
-    p_force_mag = 2e3
+    p_force_mag = 1e3
     p_force_degree = 0
+    # out of bounds forces
     oob_force = False
-    oob_force_mag = 1e4
+    oob_force_mag = 5e2
     init_distrib = 'ran_distrib'
-    multicolor = False
     color = rnd.color([255, 255, 255])
+    # forces to a certain color
     goal_forces = False
     goal_forces_mag = 1e4
     goal_forces_disburse = 1e3
     goal_forces_degree = 0
     damping = True
-    damping_mag = 0.1
+    damping_mag = 50
 
     def __init__(self, x_bounds=(0, 800), y_bounds=(0, 800), particle_amount=1e5, **kwargs):
         # assigns kwargs to member variables if allowed
@@ -60,6 +64,9 @@ class ParticleSim(object):
         for k, var in kwargs.items():
             if k in allowed_settings:
                 self.__dict__[k] = var
+            else:
+                sys.stderr.write('kw assignment "' + k + '" not found')
+                sys.stderr.flush()
 
         # creating storage containers for the particle properties and assignes a distribution
         self.particles = getattr(self, self.init_distrib)()
@@ -102,7 +109,7 @@ class ParticleSim(object):
             v_x = vel[i, 0]
             v_y = vel[i, 1]
 
-            vel_mag = np.sqrt(v_x ** 2 + v_y ** 2)
+            vel_mag = v_x ** 2 + v_y ** 2
 
             # if vel_mag:
             scale = mag * vel_mag
@@ -242,6 +249,9 @@ class ParticleSim(object):
     # multicolor functions:
     def ran_color_distrib(self):
         self.colors = (np.random.rand(self.particle_amount, 3) * 255).astype(np.uint8)
+
+    def __repr__(self):
+        print(self.__dict__)
 
     # properties
     @property

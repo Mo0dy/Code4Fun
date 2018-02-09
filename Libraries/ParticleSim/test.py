@@ -25,7 +25,7 @@ def mouse_point():
 pSim = ParticleSim((0, window_size[0]), (0, window_size[1]), 2e4,
                    color=rnd.color(153, 40, 0),
                    goal_forces=True,
-                   oob_force=True
+                   oob_force=True,
                    )
 
 pSim.ran_color_distrib()
