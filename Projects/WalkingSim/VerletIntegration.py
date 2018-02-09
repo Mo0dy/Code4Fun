@@ -4,14 +4,20 @@ from Code4Fun.Utility.Vec2 import *
 import numba as nb
 
 
-points_amount = 10
 x_margin = 500
-y_margin = 200
+y_margin = 100
 damping = 0.999
 floor_damping = 0.3
 gravity = 400
 floor_height = 750
-con_amount = 20
+con_amount = 400
+point_size = 5
+
+force_point = 8
+
+cloth_rows = 16
+cloth_columns = 16
+points_amount = cloth_rows * cloth_columns
 
 line_color = (100, 100, 100)
 node_color = (0, 204, 6)
@@ -27,25 +33,38 @@ font = pg.font.SysFont("comicsansms", 10)
 
 def init():
     global points, old_points, constraints, con_lengths
-    # points in an evenly spaced line at the top
-    # points = np.stack((np.linspace(margin, size[0] - margin, points_amount), np.zeros(points_amount)), axis=1)
 
-    # random positions
-    points = np.random.rand(points_amount, 2)
-    points[:, 0] = points[:, 0] * (size[0] - x_margin * 2) + x_margin
-    points[:, 1] = points[:, 1] * (floor_height - y_margin * 2) + y_margin
-    # initial velocity
+    d_row = (size[0] - 2 * x_margin) / (cloth_rows - 1)
+    d_col = (size[1] - 2 * y_margin) / (cloth_columns - 1)
+
+    points = []
+    for i in range(cloth_rows):
+        for j in range(cloth_columns):
+            points.append([i * d_row + x_margin, j * d_col + y_margin])
+
+    points = np.array(points)
+    print(points.shape[0])
+
     old_points = points
 
     constraints = []
-    connections_made = 0
-    while connections_made < con_amount:
-        n1 = np.random.random_integers(0, points_amount - 1)
-        n2 = np.random.random_integers(0, points_amount - 1)
-        if n1 != n2:
-            constraints.append([n1, n2])
-            connections_made += 1
+
+    for i in range(cloth_rows):
+        for j in range(cloth_columns - 1):
+            constraints.append([i * cloth_columns + j, i * cloth_columns + j + 1])
+
+    for i in range(cloth_rows - 1):
+        for j in range(cloth_columns):
+            constraints.append([i * cloth_columns + j, (i + 1) * cloth_columns + j])
+
+    for i in range(cloth_rows - 1):
+        constraints.append([cloth_rows + i + 1, i])
+
+    for i in range(1, cloth_rows):
+        constraints.append([cloth_rows + i - 1, i])
+
     constraints = np.array(constraints, dtype=np.uint8)
+
     con_lengths = np.zeros(constraints.shape[0])
     for i in range(constraints.shape[0]):
         p1 = points[constraints[i, 0]]
@@ -77,7 +96,7 @@ def update(dt):
     acceleration = np.stack((np.zeros(points_amount), np.ones(points_amount) * gravity), axis=1)
 
     if mouse_pressed:
-        acceleration[0] = (pg.mouse.get_pos() - points[0]) * 100
+        acceleration[force_point] = (pg.mouse.get_pos() - points[force_point]) * 500
     vel = points - old_points
 
     old_points = points.copy()
@@ -99,7 +118,7 @@ def update(dt):
     old_points[oob_left, 0] = points[oob_left, 0] + vel[oob_left, 0]
 
     # resolving constraints
-    for _ in range(10):
+    for _ in range(2):
         resolve_constraints(constraints, con_lengths, points)
 
 
@@ -107,15 +126,15 @@ def draw():
     screen.fill(background_color)
 
     if mouse_pressed:
-        pg.draw.line(screen, (107, 109, 50), (int(points[0, 0]), int(points[0, 1])), pg.mouse.get_pos(), 3)
+        pg.draw.line(screen, (107, 109, 50), (int(points[force_point, 0]), int(points[force_point, 1])), pg.mouse.get_pos(), 3)
 
     for c in constraints:
         p1 = points[c[0]]
         p2 = points[c[1]]
-        pg.draw.line(screen, line_color, (int(p1[0]), int(p1[1])), (int(p2[0]), int(p2[1])), 5)
+        pg.draw.line(screen, line_color, (int(p1[0]), int(p1[1])), (int(p2[0]), int(p2[1])), 3)
 
     for p in points:
-        pg.draw.circle(screen, node_color, (int(p[0]), int(p[1])), 10)
+        pg.draw.circle(screen, node_color, (int(p[0]), int(p[1])), point_size)
 
     pg.draw.line(screen, line_color, (0, floor_height + 10), (size[0], floor_height + 10), 10)
 
