@@ -25,7 +25,7 @@ font = pg.font.SysFont("comicsansms", 50)
 
 
 def reset():
-    pEffect.init(mat_shape)
+    Rain.init(mat_shape, 3)
 
 
 def clear():
@@ -35,7 +35,7 @@ def clear():
 
 def update():
     global content
-    pEffect.update(content)
+    Rain.update(content)
 
 def draw():
     global content

@@ -6,7 +6,7 @@ import scipy.ndimage
 import numba as nb
 
 
-mat_shape = 300, 500
+mat_shape = 350, 500
 
 
 mul_dx = 0.05

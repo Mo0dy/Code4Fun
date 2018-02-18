@@ -4,8 +4,8 @@ import pygame as pg
 from scipy.ndimage.filters import convolve
 
 
-mul_dx = 0.1
-mul_dy = 0.15
+mul_dx = 0.5
+mul_dy = 0.2
 candle_mul_dx = 0.1
 candle_mul_dy = 0.1
 random_fac = 0.5
