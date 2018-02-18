@@ -15,7 +15,7 @@ clock = pg.time.Clock()
 font = pg.font.SysFont("comicsansms", 20)
 
 
-def reset():
+def init():
     pass
 
 
@@ -29,14 +29,14 @@ def draw():
 
 
 keydown_func = {
-    pg.K_r: reset
+    pg.K_r: init
 }
 
 
-reset()
+init()
 loop = True
 while loop:
-    clock.tick()
+    clock.tick(60)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False
