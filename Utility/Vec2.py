@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 
 
 '''Maths functions mostly wrapping numpy
@@ -100,5 +101,8 @@ class Vec2(object):
     @property
     def tuple_int(self):
         return int(self.x), int(self.y)
+
+    def copy(self):
+        return deepcopy(self)
 
 
