@@ -53,3 +53,8 @@ Temporary Items
 Projects/WalkingSim/__pycache__/VerletIntegration.resolve_constraints-77.py36.nbi
 *.nbc
 Projects/ParticleSimulations/Old/__pycache__/guf-particle_clock_force_boundaries.fast_update_goals-116.py36.1.nbc
+
+# numba stuff
+*.nbc
+*.nbi
+*.pyc
