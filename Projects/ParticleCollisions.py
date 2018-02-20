@@ -12,12 +12,12 @@ window_size = 800, 700
 particles_x = 10
 particles_y = 10
 particle_amount = particles_x * particles_y
-min_size = 5
-max_size = 20
+min_size = 20
+max_size = 40
 margin = 50
 grav = 1e3
 oob_force = 1e5
-col_force = 1e5
+col_force = 1e4
 damping = 1
 
 
@@ -54,7 +54,7 @@ def apply_gravity():
 def apply_oob():
     # resolve floor collision:
     floor_points = particles[:, 1] > window_size[1]
-    forces[floor_points, 1] -= oob_force
+    forces[floor_points, 1] -= oob_force - velocities[floor_points, 1]
 
     # resolve left collision:
     right_points = particles[:, 0] < 0
@@ -65,8 +65,9 @@ def apply_oob():
     forces[left_points, 0] -= oob_force
 
 
-@nb.guvectorize([(nb.float64[:, :], nb.float64[:], nb.float64[:, :], nb.float64)], '(a,b),(a),(a,b),()', target='parallel', cache=True)
-def apply_collision(p, p_s, f, f_mag):
+@nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float64[:], nb.float64[:, :], nb.float64)],
+                '(a,b),(a,b),(a),(a,b),()', target='parallel', cache=True)
+def apply_collision(p, vel, p_s, f, f_mag):
     for i in range(p.shape[0]):
         for j in range(i + 1, p.shape[0]):
             # from pi to pj
@@ -81,16 +82,21 @@ def apply_collision(p, p_s, f, f_mag):
                 f_x = d_x * s
                 f_y = d_y * s
 
-                f[j, 0] += f_x
-                f[j, 1] += f_y
-                f[i, 0] -= f_x
-                f[i, 1] -= f_y
+                damp = 0.5
+
+                proj_i = vel[i, 0] * d_x + vel[i, 1] * d_y
+                proj_j = vel[j, 0] * d_x + vel[j, 1] * d_y
+
+                f[j, 0] += f_x - d_x / proj_j * damp
+                f[j, 1] += f_y - d_y / proj_j * damp
+                f[i, 0] -= f_x - d_x / proj_i * damp
+                f[i, 1] -= f_y - d_y / proj_i * damp
 
 def update(dt):
     global velocities, particles, forces
     apply_gravity()
     apply_oob()
-    apply_collision(particles, particle_sizes, forces, col_force)
+    apply_collision(particles, velocities, particle_sizes, forces, col_force)
 
     velocities += (forces - velocities * damping) * dt
     particles += velocities * dt
