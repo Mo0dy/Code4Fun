@@ -31,9 +31,9 @@ def update(dt):
 
 def draw():
     global game
-    player_surf = pg.transform.rotate(pg.transform.scale(game.player.get_sprite(), (100, 100)), game.player.angle)
-    screen.blit(player_surf, (game.player.pos - Vec2(player_surf.get_size()) / 2).tuple_int)
-    # pg.draw.circle(screen, (200, 200, 150), game.player.pos.tuple_int, 20)
+
+    p_surf = game.player.get_surf()
+    screen.blit(p_surf, (game.player.pos - Vec2(p_surf.get_size()) / 2).tuple_int)
 
     text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
     screen.blit(text, (10, 10))
