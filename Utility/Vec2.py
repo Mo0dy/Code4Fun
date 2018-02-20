@@ -13,7 +13,10 @@ class Vec2(object):
     def __init__(self, *args):
         if len(args) == 1:
             # arg is a numpy array
-            self.vec = args[0]
+            if isinstance(args[0], np.ndarray):
+                self.vec = args[0]
+            else:
+                self.vec = np.array(args[0])
         elif len(args) == 2:
             # args are x and y pos
             self.vec = np.array([args[0], args[1]])
@@ -66,8 +69,18 @@ class Vec2(object):
     def __eq__(self, other):
         return np.all(self.vec == other.vec)
 
+    def __bool__(self):
+        return bool(np.any(self.vec))
+
     def __repr__(self):
         return "<Vec2: [%f | %f]>" % (self.x, self.y)
+
+    def normalized(self):
+        length = abs(self)
+        if length:
+            return self.copy() / length
+        else:
+            return self.copy()
 
     @property
     def x(self):
@@ -105,4 +118,5 @@ class Vec2(object):
     def copy(self):
         return deepcopy(self)
 
-
+    def zero(self):
+        self.vec = np.zeros(2)

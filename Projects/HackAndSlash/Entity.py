@@ -4,6 +4,7 @@ from Code4Fun.Utility.Vec2 import *
 class Entity(object):
     def __init__(self, pos):
         self.pos = pos
+        self.angle = 0
 
 
 class LivingE(Entity):

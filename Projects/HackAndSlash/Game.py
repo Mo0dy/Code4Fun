@@ -6,7 +6,9 @@ from Code4Fun.Projects.HackAndSlash.Entity import *
 class Game(object):
     def __init__(self):
         self.player = Player()
-        print("test")
+
+    def update(self, dt):
+        self.player.update(dt)
 
     def move_player_right(self):
         self.player.move_right()

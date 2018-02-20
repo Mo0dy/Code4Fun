@@ -33,6 +33,9 @@ p_sim = pSim.ParticleSim(
     damping=False,
     oob_force=True,
     goal_forces=False,
+    p_force_mag=2e3,
+    damping_mag=1e4,
+    oob_force_mag=1e2
 )
 
 goal_screen = pg.Surface((400, 400))

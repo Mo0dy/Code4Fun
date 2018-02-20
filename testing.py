@@ -6,7 +6,6 @@ background_color = 50, 50, 50
 window_size = 800, 800
 
 
-
 pg.init()
 origin = Vec2(np.array(window_size)) / 2
 screen = pg.display.set_mode(window_size)

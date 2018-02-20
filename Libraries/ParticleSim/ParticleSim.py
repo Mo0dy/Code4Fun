@@ -14,7 +14,7 @@ allowed_settings = {
     'random_magnitude',     # the strength of the random motion
     'p_force',              # linear forces to a point
     'p_force_mag',          # mag of the linear forces
-    'p_force_degree'
+    'p_force_degree',
     'init_distrib',          # the initial distribution over the bounds
     'oob_force',            # oob forces
     'oob_force_mag',
@@ -261,6 +261,15 @@ class ParticleSim(object):
     @property
     def y_bounds(self):
         return np.array([self.bounds_min.y, self.bounds_max.y])
+
+    def set_force_points(self, *args):
+        if len(args) == 1:
+            self.force_point = np.array(args[0])
+        elif len(args) == 2:
+            self.force_point = np.array(args)
+        else:
+            sys.stderr.write('ParticleSim: "set_force_points" too many arguments')
+            sys.stderr.flush()
 
 
 @nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.boolean[:], nb.float64, nb.float64)], '(a,b),(d,e),(d),(),()', target='parallel', cache=False)

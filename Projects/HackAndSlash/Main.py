@@ -25,13 +25,15 @@ def reset():
     pass
 
 
-def update():
-    pass
+def update(dt):
+    game.update(dt)
 
 
 def draw():
     global game
-    pg.draw.circle(screen, (200, 200, 150), game.player.pos.tuple_int, 20)
+    player_surf = pg.transform.rotate(pg.transform.scale(game.player.get_sprite(), (100, 100)), game.player.angle)
+    screen.blit(player_surf, (game.player.pos - Vec2(player_surf.get_size()) / 2).tuple_int)
+    # pg.draw.circle(screen, (200, 200, 150), game.player.pos.tuple_int, 20)
 
     text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
     screen.blit(text, (10, 10))
@@ -55,7 +57,7 @@ pressed_keys = set()
 reset()
 loop = True
 while loop:
-    clock.tick()
+    clock.tick(60)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False
@@ -74,7 +76,7 @@ while loop:
         except:
             pass
 
-    update()
+    update(clock.get_time() / 1000)
     screen.fill(background_color)
     draw()
     pg.display.flip()
