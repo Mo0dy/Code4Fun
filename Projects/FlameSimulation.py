@@ -6,16 +6,16 @@ import scipy.ndimage
 import numba as nb
 
 
-mat_shape = 350, 500
+mat_shape = 300, 500
 
 
-mul_dx = 0.05
+mul_dx = 0.4
 mul_dy = 0.03
-random_fac = 0.05
+random_fac = 0.1
 start_y_mul = 0.9
 
-cooldown = 0.5
 
+cooldown = 0.7
 
 pg.init()
 origin = Vec2(np.array(mat_shape)) / 2
@@ -26,7 +26,7 @@ font = pg.font.SysFont("comicsansms", 50)
 
 
 heat_mat = np.zeros(mat_shape, dtype=np.float)
-res = 6
+res = 15
 ign_x = int(heat_mat.shape[0] / 2)
 ign_y = int(heat_mat.shape[1] * start_y_mul)
 ign_dy = int(heat_mat.shape[1] * mul_dy / 5) * 5
@@ -37,7 +37,7 @@ ignition_area = np.array([[ign_x - ign_dx, ign_x + ign_dx], [ign_y - ign_dy, ign
 def update_ignition_values():
     global ignition_values
     # ignition_values = np.reshape(np.random.random_integers(50, 60, ign_dx * 4 * ign_dy), (ign_dx * 2, ign_dy * 2)) * 8
-    ignition_values = np.reshape(np.random.random_integers(50, 60, int(ign_dx * ign_dy * 4 / res ** 2)), (int(ign_dx * 2 / res), int(ign_dy * 2 / res))) * 8
+    ignition_values = np.reshape(np.random.random_integers(20, 60, int(ign_dx * ign_dy * 4 / res ** 2)), (int(ign_dx * 2 / res), int(ign_dy * 2 / res))) * 8
     ignition_values = scipy.ndimage.zoom(ignition_values, res, order=0)
 
 
