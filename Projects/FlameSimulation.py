@@ -65,7 +65,7 @@ def render(screen_mat, mat):
                     screen_mat[i, j, 1] = 255
 
 
-@nb.guvectorize([(nb.float64[:, :], nb.float64, nb.float64[:, :])], '(a,b),(),(c,d)', target='parallel', cache=True)
+@nb.guvectorize([(nb.float64[:, :], nb.float64, nb.float64[:, :])], '(a,b),(),(c,d)', target='parallel', cache=True, nopython=True)
 def fast_update(mat, cool, lap_mat):
     for i in range(heat_mat.shape[0] - 2):
         ii = i + 1
@@ -89,6 +89,7 @@ def update():
     heat_mat[ignition_area[0][0]: ignition_area[0][1], ignition_area[1][0]: ignition_area[1][1]] = ignition_values
     # diffusion
     fast_update(heat_mat, cooldown, con_mat)
+
 
     if iterator % 20:
         render(pg.surfarray.pixels3d(screen), heat_mat)

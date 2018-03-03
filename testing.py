@@ -1,15 +1,15 @@
-from Code4Fun.Utility.Vec2 import *
 import numpy as np
 import pygame as pg
+import sys
 
 background_color = 50, 50, 50
 window_size = 800, 800
+fps_cap = 60
 
 
 pg.init()
-origin = Vec2(np.array(window_size)) / 2
 screen = pg.display.set_mode(window_size)
-pg.display.set_caption("test")
+pg.display.set_caption("Smart Rockets")
 clock = pg.time.Clock()
 font = pg.font.SysFont("comicsansms", 20)
 
@@ -18,13 +18,8 @@ def init():
     pass
 
 
-def update():
+def draw(dt):
     pass
-
-
-def draw():
-    text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
-    screen.blit(text, (10, 10))
 
 
 keydown_func = {
@@ -35,15 +30,20 @@ keydown_func = {
 init()
 loop = True
 while loop:
-    clock.tick(60)
+    clock.tick(fps_cap)
     for e in pg.event.get():
         if e.type == pg.QUIT:
             loop = False
         elif e.type == pg.KEYDOWN:
-            keydown_func[e.key]()
+            try:
+                keydown_func[e.key]()
+            except:
+                sys.stderr.write("No such Key!")
+                sys.stderr.flush()
 
-    update()
     screen.fill(background_color)
-    draw()
+    draw(clock.get_time() / 1000)
+    text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
+    screen.blit(text, (10, 10))
     pg.display.flip()
 pg.quit()

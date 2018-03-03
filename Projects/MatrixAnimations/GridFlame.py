@@ -13,9 +13,9 @@ random_fac = 0.5
 cooldown = 5
 
 
-con_mat = np.array([[0.08, 0.05, 0.02],
+con_mat = np.array([[0.18, 0.05, 0.02],
                     [0.48, -1, 0.02],
-                    [0.08, 0.05, 0.02]])
+                    [0.18, 0.05, 0.02]])
 
 
 def update_ignition_values():
