@@ -58,6 +58,10 @@ def update():
     b_x += b_vx
     b_y += b_vy
 
+
+    b_vx *= 1.001
+    b_vy *= 1.001
+
     # collision with upper and lower edge:
     if b_y - b_size / 2 < 0:
         b_y = b_size / 2
