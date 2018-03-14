@@ -26,6 +26,8 @@ font = pg.font.SysFont("comicsansms", 50)
 
 
 orig_mat = np.zeros(mat_shape, dtype=np.float)
+new_mat = np.zeros(mat_shape, dtype=np.float)
+
 res = 15
 ign_x = int(orig_mat.shape[0] / 2)
 ign_y = int(orig_mat.shape[1] * start_y_mul)
@@ -67,33 +69,45 @@ def render(screen_mat, mat):
 
 @nb.guvectorize([(nb.float64[:, :], nb.float64, nb.float64[:, :])], '(a,b),(),(c,d)', target='parallel', cache=True, nopython=True)
 def fast_update(mat, cool, lap_mat):
+    for i in nb.prange(orig_mat.shape[0] - 2):
+        ii = i + 1
+        for j in nb.prange(orig_mat.shape[1] - 2):
+            jj = j + 1
+            mat[ii, jj] = orig_mat[ii, jj] - cool
+
     for i in range(orig_mat.shape[0] - 2):
         ii = i + 1
         for j in range(orig_mat.shape[1] - 2):
             jj = j + 1
-            my_sum = 0
             for a in range(3):
                 for b in range(3):
-                    my_sum += orig_mat[i + a, j + b] * lap_mat[a, b]
-            mat[ii, jj] = orig_mat[ii, jj] + my_sum - cool
+                    mat[i + a, j + b] += orig_mat[ii, jj] * lap_mat[a, b]
+
+    for i in nb.prange(orig_mat.shape[0] - 2):
+        ii = i + 1
+        for j in range(orig_mat.shape[1] - 2):
+            jj = j + 1
             if mat[ii, jj] < 0:
                 mat[ii, jj] = 0
 
-
 iterator = 0
 def update():
-    global orig_mat, iterator
+    global orig_mat, iterator, new_mat
     # sparking flame:
     if np.random.rand() < random_fac:
         update_ignition_values()
-    heat_mat[ignition_area[0][0]: ignition_area[0][1], ignition_area[1][0]: ignition_area[1][1]] = ignition_values
+    orig_mat[ignition_area[0][0]: ignition_area[0][1], ignition_area[1][0]: ignition_area[1][1]] = ignition_values
     # diffusion
-    fast_update(heat_mat, cooldown, con_mat)
-
+    fast_update(new_mat, cooldown, con_mat)
 
     if iterator % 20:
-        render(pg.surfarray.pixels3d(screen), heat_mat)
+        render(pg.surfarray.pixels3d(screen), orig_mat)
     iterator += 1
+
+    tMat = orig_mat
+    orig_mat = new_mat
+    new_mat = tMat
+
 
 loop = True
 while loop:
