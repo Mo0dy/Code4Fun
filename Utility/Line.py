@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.linalg as sla
-from MyMaths.Vec2 import Vec2
+from Code4Fun.Utility.Vec2 import Vec2
 import sys
 
 

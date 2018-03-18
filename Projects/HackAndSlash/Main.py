@@ -1,6 +1,7 @@
 # rendering
 from Code4Fun.Utility.Vec2 import *
 from Code4Fun.Projects.HackAndSlash.Game import *
+from Code4Fun.Projects.HackAndSlash.Terrain import Terrain
 import numpy as np
 import pygame as pg
 
@@ -22,7 +23,7 @@ game = Game()
 
 
 def reset():
-    pass
+    game.reset()
 
 
 def update(dt):
@@ -34,6 +35,8 @@ def draw():
 
     p_surf = game.player.get_surf()
     screen.blit(p_surf, (game.player.pos - Vec2(p_surf.get_size()) / 2).tuple_int)
+
+    game.terrain.draw_terrain(screen)
 
     text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
     screen.blit(text, (10, 10))

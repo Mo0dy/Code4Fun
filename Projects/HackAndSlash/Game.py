@@ -1,11 +1,16 @@
 # game logic
 from Code4Fun.Projects.HackAndSlash.Player import *
 from Code4Fun.Projects.HackAndSlash.Entity import *
+from Code4Fun.Projects.HackAndSlash.Terrain import Terrain
 
 
 class Game(object):
     def __init__(self):
         self.player = Player()
+        self.terrain = Terrain(100, 100)
+
+    def reset(self):
+        self.terrain = Terrain(100, 100)
 
     def update(self, dt):
         self.player.update(dt)
