@@ -22,9 +22,9 @@ font = pg.font.SysFont("comicsansms", 50)
 
 # new_mat = np.zeros(mat_shape, dtype=np.float)
 # old_mat = np.zeros(mat_shape, dtype=np.float)
-#
+
 # mats = [new_mat, old_mat]
-#
+
 # curr_mat = True
 
 orig_mat = np.zeros(mat_shape, dtype=np.float)

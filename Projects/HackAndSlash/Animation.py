@@ -32,6 +32,7 @@ class Anim(object):
     def set_anim_time(self, anim_time):
         self.step_time = anim_time / len(self.anim)
 
+
 def load_animation(path, filetype, amount):
     anim = []
     for i in range(1, amount + 1):

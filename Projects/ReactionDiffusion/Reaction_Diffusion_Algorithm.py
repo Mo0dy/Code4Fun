@@ -8,7 +8,7 @@ import Code4Fun.Utility.Renderer as rnd
 
 
 # Constants =======================================================================================
-size_x = size_y = 200
+size_x = size_y = 300
 laplace_mat = np.array([[0.05, 0.2, 0.05],
                         [0.2, -1, 0.2],
                         [0.05, 0.2, 0.05]], dtype=np.float32)
@@ -94,7 +94,7 @@ def update(original_a, lap_mat, kill, feed, Da, Db, new_a):
             jj = j + 1
             sumA = 0
             sumB = 0
-            for a in range():
+            for a in range(3):
                 for b in range(3):
                     sumA += original_a[i + a, j + b, 0] * lap_mat[a, b]
                     sumB += original_a[i + a, j + b, 1] * lap_mat[a, b]

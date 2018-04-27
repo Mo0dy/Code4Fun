@@ -120,3 +120,6 @@ class Vec2(object):
 
     def zero(self):
         self.vec = np.zeros(2)
+
+    def set_length(self, length):
+        self *= length / abs(self)

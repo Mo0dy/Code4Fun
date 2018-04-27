@@ -86,13 +86,13 @@ def update():
     # sparking flame:
     if np.random.rand() < random_fac:
         update_ignition_values()
-    heat_mat[ignition_area[0][0]: ignition_area[0][1], ignition_area[1][0]: ignition_area[1][1]] = ignition_values
+    orig_mat[ignition_area[0][0]: ignition_area[0][1], ignition_area[1][0]: ignition_area[1][1]] = ignition_values
     # diffusion
-    fast_update(heat_mat, cooldown, con_mat)
+    fast_update(orig_mat, cooldown, con_mat)
 
 
     if iterator % 20:
-        render(pg.surfarray.pixels3d(screen), heat_mat)
+        render(pg.surfarray.pixels3d(screen), orig_mat)
     iterator += 1
 
 loop = True

@@ -4,6 +4,7 @@ from Code4Fun.Projects.HackAndSlash.Game import *
 from Code4Fun.Projects.HackAndSlash.Terrain import Terrain
 import numpy as np
 import pygame as pg
+from Code4Fun.Utility.PygameAdditionals import *
 
 background_color = 50, 50, 50
 window_size = 800, 800
@@ -33,10 +34,7 @@ def update(dt):
 def draw():
     global game
 
-    p_surf = game.player.get_surf()
-    screen.blit(p_surf, (game.player.pos - Vec2(p_surf.get_size()) / 2).tuple_int)
-
-    game.terrain.draw_terrain(screen)
+    game.draw(screen)
 
     text = font.render("%0.2f" % clock.get_fps(), True, (255, 255, 255))
     screen.blit(text, (10, 10))
@@ -72,6 +70,9 @@ while loop:
                 pass
         elif e.type == pg.KEYUP:
             pressed_keys.remove(e.key)
+        elif e.type == pg.MOUSEBUTTONDOWN:
+            if e.button == MB_LEFT:
+                game.player.lunge()
 
     for e in pressed_keys:
         try:
