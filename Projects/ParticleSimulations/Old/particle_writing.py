@@ -41,7 +41,7 @@ small_font = pg.font.SysFont("comicsansms", 10)
 display_font = pg.font.SysFont("caolibri", text_size)
 pg.mouse.set_visible(False)
 
-paint_image = pg.image.load("Assets\\FillEffect.png")
+paint_image = pg.image.load("..\\Assets\\FillEffect.png")
 paint_image_rect = paint_image.get_rect()
 paint_image_rect.x = window_size[0] - 10
 
