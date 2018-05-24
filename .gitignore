@@ -58,3 +58,4 @@ Projects/ParticleSimulations/Old/__pycache__/guf-particle_clock_force_boundaries
 *.nbc
 *.nbi
 *.pyc
+__pycache__/
