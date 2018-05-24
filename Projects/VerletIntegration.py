@@ -31,7 +31,7 @@ clock = pg.time.Clock()
 font = pg.font.SysFont("comicsansms", 10)
 
 
-def init():
+def cloth_init():
     global points, old_points, constraints, con_lengths
 
     d_row = (size[0] - 2 * x_margin) / (cloth_rows - 1)
@@ -72,6 +72,10 @@ def init():
         delta = p1 - p2
         dist = np.sqrt(np.sum(delta @ delta))
         con_lengths[i] = dist
+
+
+def init():
+    cloth_init()
 
 
 @nb.guvectorize([(nb.uint8[:, :], nb.float64[:], nb.float64[:, :])], '(a,b),(a),(c,b)', target='parallel', cache=True)

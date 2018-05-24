@@ -1,6 +1,6 @@
 import numpy as np
 import pygame as pg
-from TopLevel.Vec2 import Vec2
+from Code4Fun.Utility.Vec2 import Vec2
 from numba import guvectorize, complex64, int32
 from PIL import Image
 
