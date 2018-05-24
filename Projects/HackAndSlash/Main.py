@@ -51,6 +51,11 @@ keypressed_func = {
     pg.K_d: game.move_player_right,
 }
 
+# these functions get called when mouse actions happen
+mb_func = {
+    MB_LEFT: game.player.lunge,
+}
+
 
 pressed_keys = set()
 
@@ -64,21 +69,17 @@ while loop:
             loop = False
         elif e.type == pg.KEYDOWN:
             pressed_keys.add(e.key)
-            try:
+            if e.key in keydown_func:
                 keydown_func[e.key]()
-            except:
-                pass
         elif e.type == pg.KEYUP:
             pressed_keys.remove(e.key)
         elif e.type == pg.MOUSEBUTTONDOWN:
-            if e.button == MB_LEFT:
-                game.player.lunge()
+            if e.button in mb_func:
+                mb_func[e.button]()
 
-    for e in pressed_keys:
-        try:
-            keypressed_func[e]()
-        except:
-            pass
+    for k in pressed_keys:
+        if k in keypressed_func:
+            keypressed_func[k]()
 
     update(clock.get_time() / 1000)
     screen.fill(background_color)

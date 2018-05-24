@@ -25,7 +25,7 @@ font = pg.font.SysFont("comicsansms", 50)
 
 
 def reset():
-    Rain.init(mat_shape, 3)
+    gFlame.init(mat_shape, 1)
 
 
 def clear():
@@ -35,7 +35,7 @@ def clear():
 
 def update():
     global content
-    Rain.update(content)
+    gFlame.update(content)
 
 def draw():
     global content

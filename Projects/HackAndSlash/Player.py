@@ -8,7 +8,6 @@ lunging = 1
 normal = 0
 
 
-
 class Player(LivingE):
     def __init__(self, pos=Vec2(0, 0)):
         super().__init__(pos)
@@ -101,16 +100,20 @@ class Player(LivingE):
                 self.state = normal
 
     def move_right(self):
-        self.vel.x = 1
+        if self.state == normal:
+            self.vel.x = 1
 
     def move_left(self):
-        self.vel.x = -1
+        if self.state == normal:
+            self.vel.x = -1
 
     def move_up(self):
-        self.vel.y = -1
+        if self.state == normal:
+            self.vel.y = -1
 
     def move_down(self):
-        self.vel.y = 1
+        if self.state == normal:
+            self.vel.y = 1
 
     def lunge(self):
         self.state = lunging
