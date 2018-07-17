@@ -111,8 +111,11 @@ def add_frame_anim():
 # plays the animation
 # this locks the program!
 def play_animation():
+    global matrix
     for m in animation.play():
         send_matrix_arduino(m)
+        draw_matrix(m)
+        pg.display.flip()
 
 
 def save_anim():
@@ -182,6 +185,12 @@ def init():
     flip_leds_arduino()
 
 
+def draw_matrix(mat):
+    for x in range(columns):
+        for y in range(rows):
+            pg.draw.rect(screen, mat.leds[x, y], (x * square_dx + border_thickness_half, y * square_dy + border_thickness_half, square_dx - border_thickness_half * 2, square_dy - border_thickness_half * 2))
+
+
 def draw(dt):
     if left_mb_pressed:
         draw_on_matrix(draw_color, square_under_mouse())
@@ -195,9 +204,7 @@ def draw(dt):
     elif right_mb_pressed:
         draw_on_matrix((0, 0, 0), square_under_mouse())
 
-    for x in range(columns):
-        for y in range(rows):
-            pg.draw.rect(screen, matrix.leds[x, y], (x * square_dx + border_thickness_half, y * square_dy + border_thickness_half, square_dx - border_thickness_half * 2, square_dy - border_thickness_half * 2))
+    draw_matrix(matrix)
 
     for s in sliders.values():
         s.draw(screen)
