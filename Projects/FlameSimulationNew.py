@@ -6,10 +6,14 @@ import scipy.ndimage
 import numba as nb
 
 
-mat_shape = 301, 301
+mat_shape = 301, 501
 
 nx = mat_shape[0]
 ny = mat_shape[1]
+
+mul_dx = 0.8
+random_fac = 0.05
+res = 15
 
 scale = 1
 
@@ -35,6 +39,10 @@ dy = 1 / mat_shape[1]
 
 mat_1[100:200, -1] = 500
 mat_2[100:200, -1] = 500
+
+ign_dx = int(mat_1.shape[0] * mul_dx / res)
+
+cooling = 0.1
 
 
 @nb.guvectorize([(nb.uint8[:, :, :], nb.float64[:, :])], '(a,b,c),(a,b)', target='parallel', cache=True)
@@ -99,27 +107,35 @@ def update():
     global mat_1, mat_2, curr_mat, iterator
 
     # sparking flame:
-    if np.random.rand() < 0.01:
+    if np.random.rand() < random_fac:
         # dirichtle randbedingung (does not get updates)
-        mat_1[:, -1] = 0
-        mat_2[:, -1] = 0
-        for i in range(7):
-            start = np.random.random_integers(50, mat_1.shape[0] - 100)
-            end = start + 30
+        ignition_values = np.random.random_integers(150, 500, ign_dx)
+        ignition_values = scipy.ndimage.zoom(ignition_values, res, order=0)
 
-            mat_1[start:end, -1] = 500
-            mat_2[start:end, -1] = 500
+        start = int((nx - ignition_values.shape[0]) / 2)
+
+        mat_1[start:start+ignition_values.shape[0], -1] = ignition_values
+        mat_2[start:start+ignition_values.shape[0], -1] = ignition_values
+
+        # mat_1[:, -1] = 0
+        # mat_2[:, -1] = 0
+        # for i in range(7):
+        #     start = np.random.random_integers(50, mat_1.shape[0] - 100)
+        #     end = start + 30
+        #
+        #     mat_1[start:end, -1] = 500
+        #     mat_2[start:end, -1] = 500
     # diffusion
     if curr_mat:
         fast_update(mat_1, mat_2)
         cpy = mat_1[:, -1].copy()
-        mat_1 -= 0.03
+        mat_1 -= cooling
         mat_1[mat_1 < 0] = 0
         mat_1[:, -1] = cpy
     else:
         fast_update(mat_2, mat_1)
         cpy = mat_1[:, -1].copy()
-        mat_2 -= 0.03
+        mat_2 -= cooling
         mat_2[mat_2 < 0] = 0
         mat_2[:, -1] = cpy
 
