@@ -4,9 +4,9 @@ import pygame as pg
 import pygame.surfarray
 import scipy.ndimage
 import numba as nb
+from Code4Fun.Utility.PerlinNoise import PerlinNoise as Noise
 
-
-mat_shape = 200, 200
+mat_shape = 300, 300
 
 nx = mat_shape[0]
 ny = mat_shape[1]
@@ -14,6 +14,7 @@ ny = mat_shape[1]
 mul_dx = 0.8
 random_fac = 0.05
 res = 15
+noise_detail = 20
 
 scale = 1
 
@@ -28,6 +29,12 @@ font = pg.font.SysFont("comicsansms", 50)
 
 mat_1 = np.zeros(mat_shape, dtype=np.float64)
 mat_2 = np.zeros(mat_shape, dtype=np.float64)
+
+# we need two noises for the two vector field components
+v = np.zeros((2, nx, ny))
+# this needs to allow for two different dimensions
+n1 = Noise(nx, noise_detail)
+n2 = Noise(ny, noise_detail)
 
 curr_mat = False
 
@@ -81,8 +88,8 @@ def render_scale(screen_mat, mat, s):
                     screen_mat[i * s + a, j * s + b, 1] = color[1]
 
 
-@nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float32)], '(a,b),(a,b),()', target='parallel', cache=True, nopython=True)
-def fast_update(mat, o_mat, w):
+@nb.guvectorize([(nb.float64[:, :], nb.float64[:, :], nb.float64[:, :, :])], '(a,b),(a,b),(c,a,b)', target='parallel', cache=True, nopython=True)
+def fast_update(mat, o_mat, e):
     c = ny / nx
     csqr = c ** 2
     for ii in range(o_mat.shape[0] - 2):
@@ -97,8 +104,8 @@ def fast_update(mat, o_mat, w):
             #
             mat[i, j] = o_mat[i, j] + nx * (D * nx * ((o_mat[i - 1, j] - 2 * o_mat[i, j] + o_mat[i + 1, j]) + (
                         o_mat[i, j - 1] - 2 * o_mat[i, j] + o_mat[i, j + 1]) / csqr) - \
-                                            E * ((o_mat[i, j + 1] - o_mat[i, j - 1]) * c + (
-                                                        o_mat[i + 1, j] - o_mat[i - 1, j]) * w)) * 0.00001
+                                            ((o_mat[i, j + 1] - o_mat[i, j - 1]) * c * e[0, i, j] + (
+                                                        o_mat[i + 1, j] - o_mat[i - 1, j]) * e[1, i, j])) * 0.00001
 
     # neumann randbedingungen adiabat:
     # for jj in range(mat.shape[1] - 2):
@@ -117,7 +124,6 @@ def update():
         # dirichtle randbedingung (does not get updates)
         ignition_values = np.random.random_integers(150, 500, ign_dx)
         ignition_values = scipy.ndimage.zoom(ignition_values, res, order=0)
-        wind = np.random.rand() * 2 - 1
 
         start = int((nx - ignition_values.shape[0]) / 2)
 
@@ -134,13 +140,13 @@ def update():
         #     mat_2[start:end, -1] = 500
     # diffusion
     if curr_mat:
-        fast_update(mat_1, mat_2, wind)
+        fast_update(mat_1, mat_2, v)
         cpy = mat_1[:, -1].copy()
         mat_1 -= cooling
         mat_1[mat_1 < 0] = 0
         mat_1[:, -1] = cpy
     else:
-        fast_update(mat_2, mat_1, wind)
+        fast_update(mat_2, mat_1, v)
         cpy = mat_1[:, -1].copy()
         mat_2 -= cooling
         mat_2[mat_2 < 0] = 0
@@ -162,6 +168,11 @@ def update():
         #             if color[1] > 255:
         #                 color[1] = 255
         #         pg.draw.rect(screen, color, (i * scale, j * scale, scale, scale))
+
+    if not iterator % 10:
+        v[0] = n1.generate_2D_perlin_noise(dtype=np.float64)
+        v[0] -= 10
+        v[1] = n2.generate_2D_perlin_noise(dtype=np.float64)
     iterator += 1
 
 loop = True

@@ -49,6 +49,7 @@ display_mines = False
 chosen_fileds = 0
 mines_amount = 0
 
+
 def under_mouse():
     mouse_pos = Vec2(pg.mouse.get_pos()[0], pg.mouse.get_pos()[1])
     # normalize mouse pos
@@ -60,14 +61,17 @@ def under_mouse():
 
 def choice(x, y):
     global chosen_fileds
-    if distances[x, y]:
-        info[x, y] = distances[x, y]
-        chosen_fileds += 1
+    if mines[x, y]:
+        game_over()
     else:
-        depth_f = depth_first(x, y)
-        for i in depth_f:
-            info[i[0], i[1]] = distances[i[0], i[1]]
-        chosen_fileds += len(depth_f)
+        if distances[x, y]:
+            info[x, y] = distances[x, y]
+            chosen_fileds += 1
+        else:
+            depth_f = depth_first(x, y)
+            for i in depth_f:
+                info[i[0], i[1]] = distances[i[0], i[1]]
+            chosen_fileds += len(depth_f)
 
 
 def calc_dist():
@@ -96,10 +100,7 @@ def game_over():
 
 def on_click():
     m_pos = under_mouse()
-    if mines[m_pos[0], m_pos[1]]:
-        game_over()
-    else:
-        choice(m_pos[0], m_pos[1])
+    choice(m_pos[0], m_pos[1])
 
 
 def update():

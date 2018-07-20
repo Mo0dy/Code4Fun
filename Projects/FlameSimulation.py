@@ -6,7 +6,7 @@ import scipy.ndimage
 import numba as nb
 
 
-mat_shape = 300, 500
+mat_shape = 301, 501
 
 
 mul_dx = 0.4
@@ -91,7 +91,7 @@ def update():
     fast_update(orig_mat, cooldown, con_mat)
 
 
-    if iterator % 20:
+    if not iterator % 5:
         render(pg.surfarray.pixels3d(screen), orig_mat)
     iterator += 1
 
