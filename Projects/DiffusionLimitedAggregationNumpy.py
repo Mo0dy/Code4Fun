@@ -13,7 +13,7 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Diffusion Limited Aggregation")
 
 
-walker_vel = 2
+walker_vel = 3
 walker_color = (255, 255, 255)
 walker_size = 4
 walker_size_squared = np.float32(walker_size * walker_size * 4)
